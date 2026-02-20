@@ -1,4 +1,4 @@
-# CivicSense - Complete Feature Implementation Report
+# civicsense2 - Complete Feature Implementation Report
 
 ## ✅ ALL FEATURES IMPLEMENTED SUCCESSFULLY
 
@@ -7,21 +7,25 @@
 ## 🛠 KEY DELIVERABLES (MVP) - ALL COMPLETED
 
 ### ✅ 1. Multi-Channel Ingestion
+
 **Status:** FULLY IMPLEMENTED
 **Location:** `frontend/src/components/ComplaintForm.tsx`
 **Features:**
+
 - ✅ Text Input - Textarea for complaint description
 - ✅ Voice Recording - Browser MediaRecorder API (10-second recording)
 - ✅ Image Upload - File input accepting images
 - ✅ Audio Upload - Recorded audio files stored
 
 **Technology:**
+
 - React useState hooks for form management
 - Browser MediaRecorder API for voice recording
 - Multer (backend) for file uploads
 - FormData API for multipart form submission
 
 **Code Location:**
+
 ```
 Lines 42-64: startRecording() function - Voice recording
 Lines 117-122: Image upload input
@@ -31,25 +35,30 @@ Lines 124-127: Audio recording button
 ---
 
 ### ✅ 2. NLP Classifier
+
 **Status:** FULLY IMPLEMENTED
 **Location:** `backend/services/aiService.js`
 **Features:**
+
 - ✅ Automatic categorization into: Sanitation, Infrastructure, Safety
 - ✅ Uses Google Gemini 1.5 Flash AI model
 - ✅ Fallback to Infrastructure if AI fails
 
 **Technology:**
+
 - Google Generative AI (@google/generative-ai)
 - Gemini 1.5 Flash model
 - Prompt engineering for accurate classification
 
 **Code Location:**
+
 ```
 Lines 8-22: classifyComplaint() function
 Backend processes every complaint through AI classification
 ```
 
 **How it works:**
+
 1. Complaint text sent to Gemini AI
 2. AI analyzes content and returns category
 3. Category mapped to department (Sanitation Dept, Public Works, Police)
@@ -57,20 +66,24 @@ Backend processes every complaint through AI classification
 ---
 
 ### ✅ 3. Sentiment & Urgency Analyzer
+
 **Status:** FULLY IMPLEMENTED
 **Location:** `backend/services/aiService.js`
 **Features:**
+
 - ✅ Detects urgency keywords: accident, fire, blocked, emergency, urgent, danger, critical, immediate, help, death, injury
 - ✅ Assigns Priority Score: High/Medium/Low
 - ✅ Sentiment analysis (-1 to 1 scale)
 - ✅ Extracts urgency words from complaint
 
 **Technology:**
+
 - Google Gemini AI for sentiment analysis
 - Keyword matching algorithm (fallback)
 - JSON response parsing
 
 **Code Location:**
+
 ```
 Lines 6: URGENCY_KEYWORDS array
 Lines 24-44: analyzeSentiment() function
@@ -78,6 +91,7 @@ Lines 35-42: Fallback urgency detection
 ```
 
 **Priority Assignment Logic:**
+
 - High: Contains urgency keywords (accident, fire, emergency, etc.)
 - Medium: No urgency keywords but negative sentiment
 - Low: Neutral or positive sentiment
@@ -85,9 +99,11 @@ Lines 35-42: Fallback urgency detection
 ---
 
 ### ✅ 4. Automated Routing
+
 **Status:** FULLY IMPLEMENTED
 **Location:** `backend/controllers/complaintController.js`
 **Features:**
+
 - ✅ Auto-assigns to correct department based on category
 - ✅ Department mapping:
   - Sanitation → Sanitation Department
@@ -96,11 +112,13 @@ Lines 35-42: Fallback urgency detection
 - ✅ Visible in dashboard with department filters
 
 **Technology:**
+
 - JavaScript object mapping (DEPARTMENT_MAP)
 - PostgreSQL storage with department field
 - React filters for department-wise viewing
 
 **Code Location:**
+
 ```
 Lines 4-8: DEPARTMENT_MAP configuration
 Line 23: Automatic department assignment
@@ -112,19 +130,23 @@ Dashboard filters by department
 ## ⭐ BONUS FEATURES - ALL COMPLETED
 
 ### ✅ 5. Voice-to-Text for Accessibility
+
 **Status:** IMPLEMENTED (Recording + Storage)
 **Location:** `frontend/src/components/ComplaintForm.tsx`
 **Features:**
+
 - ✅ Voice recording in browser (10-second limit)
 - ✅ Audio file storage on server
 - ✅ Multi-lingual support ready (Hindi/Marathi/English)
 
 **Technology:**
+
 - Browser MediaRecorder API
 - WebM audio format
 - Multer file storage
 
 **Code Location:**
+
 ```
 Lines 42-64: Voice recording implementation
 Audio stored in backend/uploads/ folder
@@ -135,9 +157,11 @@ Audio stored in backend/uploads/ folder
 ---
 
 ### ✅ 6. Duplicate Detection
+
 **Status:** FULLY IMPLEMENTED
 **Location:** `backend/services/aiService.js`
 **Features:**
+
 - ✅ Detects similar complaints from same location
 - ✅ Groups duplicates using duplicate_group_id
 - ✅ 70% similarity threshold
@@ -145,17 +169,20 @@ Audio stored in backend/uploads/ folder
 - ✅ Only checks unresolved complaints
 
 **Technology:**
+
 - Text similarity algorithm (Jaccard similarity)
 - PostgreSQL queries with time filters
 - Word tokenization and set intersection
 
 **Code Location:**
+
 ```
 Lines 58-77: detectDuplicates() function
 Lines 79-87: calculateSimilarity() algorithm
 ```
 
 **How it works:**
+
 1. New complaint arrives
 2. Query database for similar complaints (same category + location, last 7 days)
 3. Calculate text similarity using word matching
@@ -164,12 +191,15 @@ Lines 79-87: calculateSimilarity() algorithm
 ---
 
 ### ✅ 7. Predictive Analytics (Hotspots)
+
 **Status:** FULLY IMPLEMENTED
-**Location:** 
+**Location:**
+
 - Backend: `backend/controllers/complaintController.js`
 - Frontend: `frontend/src/components/Dashboard.tsx`
 
 **Features:**
+
 - ✅ Identifies areas with 3+ complaints in 30 days
 - ✅ Groups by location and category
 - ✅ Real-time hotspot tracking
@@ -177,11 +207,13 @@ Lines 79-87: calculateSimilarity() algorithm
 - ✅ Sorted by complaint count
 
 **Technology:**
+
 - PostgreSQL aggregation queries (GROUP BY, HAVING, COUNT)
 - Separate hotspots table for analytics
 - React state management for real-time updates
 
 **Code Location:**
+
 ```
 Backend Lines 107-120: getHotspots() function
 Backend Lines 161-177: updateHotspots() function
@@ -190,47 +222,55 @@ Database: hotspots table
 ```
 
 **SQL Query:**
+
 ```sql
-SELECT location, category, COUNT(*) as complaint_count 
-FROM complaints 
-WHERE created_at > NOW() - INTERVAL '30 days' 
-GROUP BY location, category 
-HAVING COUNT(*) >= 3 
+SELECT location, category, COUNT(*) as complaint_count
+FROM complaints
+WHERE created_at > NOW() - INTERVAL '30 days'
+GROUP BY location, category
+HAVING COUNT(*) >= 3
 ORDER BY complaint_count DESC
 ```
 
 ---
 
 ### ✅ 8. Multi-lingual Support
+
 **Status:** FULLY IMPLEMENTED
-**Location:** 
+**Location:**
+
 - Frontend: `frontend/src/components/ComplaintForm.tsx`
 - Backend: `backend/services/aiService.js`
 
 **Features:**
+
 - ✅ Language selection: English, Hindi, Marathi
 - ✅ AI-powered translation to English for officials
 - ✅ Original language stored in database
 - ✅ Gemini AI handles translation
 
 **Technology:**
+
 - Google Gemini AI translation
 - Language dropdown in form
 - PostgreSQL language field storage
 
 **Code Location:**
 **Frontend:**
+
 ```
 Lines 113-118: Language selector dropdown
 ```
 
 **Backend:**
+
 ```
 Lines 46-56: translateText() function
 Lines 15-17: Translation logic in createComplaint
 ```
 
 **How it works:**
+
 1. User selects language (Hindi/Marathi)
 2. Types complaint in their language
 3. Backend translates to English using Gemini AI
@@ -279,6 +319,7 @@ DevCraft-Localhost/
 ## 🔧 TECHNOLOGY STACK
 
 ### Frontend
+
 - **Framework:** React 19.2.0
 - **Language:** TypeScript
 - **Build Tool:** Vite 7.3.1
@@ -288,6 +329,7 @@ DevCraft-Localhost/
 - **Styling:** Custom CSS (Gradient design)
 
 ### Backend
+
 - **Runtime:** Node.js
 - **Framework:** Express 5.2.1
 - **Language:** JavaScript (CommonJS)
@@ -297,11 +339,13 @@ DevCraft-Localhost/
 - **Environment:** dotenv 17.3.1
 
 ### Database
+
 - **Database:** PostgreSQL
 - **Client:** pg 8.11.3
 - **Admin Tool:** pgAdmin
 
 ### AI/ML
+
 - **Model:** Google Gemini 1.5 Flash
 - **Capabilities:**
   - Text classification
@@ -314,6 +358,7 @@ DevCraft-Localhost/
 ## 📊 DATABASE SCHEMA
 
 ### complaints table
+
 ```sql
 - id (SERIAL PRIMARY KEY)
 - citizen_name (VARCHAR)
@@ -335,6 +380,7 @@ DevCraft-Localhost/
 ```
 
 ### departments table
+
 ```sql
 - id (SERIAL PRIMARY KEY)
 - name (VARCHAR)
@@ -344,6 +390,7 @@ DevCraft-Localhost/
 ```
 
 ### hotspots table
+
 ```sql
 - id (SERIAL PRIMARY KEY)
 - location (VARCHAR)
@@ -358,25 +405,30 @@ DevCraft-Localhost/
 ## 🎯 API ENDPOINTS
 
 ### POST /api/complaints
+
 - Create new complaint
 - Accepts: FormData (multipart/form-data)
 - Returns: Complaint object with AI analysis
 
 ### GET /api/complaints
+
 - Get all complaints
 - Query params: department, priority, status
 - Returns: Array of complaints
 
 ### PATCH /api/complaints/:id/status
+
 - Update complaint status
 - Body: { status: "pending/in_progress/resolved" }
 - Returns: Updated complaint
 
 ### GET /api/complaints/hotspots
+
 - Get hotspot areas
 - Returns: Array of locations with high complaint counts
 
 ### GET /api/complaints/stats
+
 - Get dashboard statistics
 - Returns: Total, high_priority, pending, resolved counts
 
@@ -385,12 +437,14 @@ DevCraft-Localhost/
 ## 🎨 UI FEATURES
 
 ### Landing Page (Home.tsx)
+
 - Hero section with project title
 - 3 feature cards explaining capabilities
 - CTA buttons to Submit Complaint and View Dashboard
 - Purple gradient background
 
 ### Complaint Form (ComplaintForm.tsx)
+
 - Name, Phone, Complaint text inputs
 - Location field
 - Language selector (English/Hindi/Marathi)
@@ -400,6 +454,7 @@ DevCraft-Localhost/
 - Success message with animation
 
 ### Dashboard (Dashboard.tsx)
+
 - 4 stat cards: Total, High Priority, Pending, Resolved
 - Filter dropdowns: Priority, Status, Department
 - Complaint cards with:
@@ -420,11 +475,13 @@ DevCraft-Localhost/
    - Run `backend/database.sql`
 
 2. **Backend:**
+
    ```bash
    cd backend
    npm install
    npm run dev
    ```
+
    Runs on: http://localhost:5000
 
 3. **Frontend:**
@@ -440,18 +497,21 @@ DevCraft-Localhost/
 ## ✅ FEATURE CHECKLIST - ALL COMPLETE
 
 ### MVP Features
+
 - [x] Multi-Channel Ingestion (Text, Voice, Image)
 - [x] NLP Classifier (Sanitation/Infrastructure/Safety)
 - [x] Sentiment & Urgency Analyzer
 - [x] Automated Department Routing
 
 ### Bonus Features
+
 - [x] Voice-to-Text for Accessibility
 - [x] Duplicate Detection (70% similarity)
 - [x] Predictive Analytics (Hotspots)
 - [x] Multi-lingual Support (Hindi/Marathi/English)
 
 ### Additional Features
+
 - [x] Real-time dashboard with statistics
 - [x] Status tracking (Pending/In Progress/Resolved)
 - [x] Department-wise filtering
@@ -479,7 +539,7 @@ DevCraft-Localhost/
 ## 📝 DEMO FLOW
 
 1. **Landing Page** → Show features
-2. **Submit Complaint** → 
+2. **Submit Complaint** →
    - Fill form in Hindi/Marathi
    - Record voice
    - Upload image

@@ -1,6 +1,6 @@
 @echo off
 echo ========================================
-echo Strategic Git Commits - CivicSense
+echo Strategic Git Commits - civicsense2
 echo ========================================
 echo.
 echo This will create 23 commits over 2 days

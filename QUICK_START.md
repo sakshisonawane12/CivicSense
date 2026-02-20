@@ -1,4 +1,4 @@
-# 🚀 Quick Start Guide - CivicSense
+# 🚀 Quick Start Guide - civicsense2
 
 ## For Judges/Reviewers
 
@@ -10,7 +10,7 @@ git clone <repo-url>
 cd DevCraft-Localhost
 
 # Setup Database (in pgAdmin)
-# Create database 'civicsense' and run backend/database.sql
+# Create database 'civicsense2' and run backend/database.sql
 
 # Backend
 cd backend
@@ -31,6 +31,7 @@ npm run dev
 ## Quick Test Flow
 
 ### Test 1: Submit High Priority Complaint (30 seconds)
+
 1. Click "Submit Complaint"
 2. Fill form:
    - Name: Test User
@@ -41,6 +42,7 @@ npm run dev
 4. See success message
 
 ### Test 2: View Dashboard (30 seconds)
+
 1. Click "Dashboard" in navbar
 2. See statistics cards
 3. See your complaint with HIGH priority (red badge)
@@ -48,6 +50,7 @@ npm run dev
 5. Change status to "In Progress"
 
 ### Test 3: Multi-lingual (30 seconds)
+
 1. Go back to Submit Complaint
 2. Select "Hindi" language
 3. Enter: "सड़क पर गड्ढा है"
@@ -55,6 +58,7 @@ npm run dev
 5. Check dashboard - see it translated to English
 
 ### Test 4: Hotspot (1 minute)
+
 1. Submit 3 complaints from same location (e.g., "FC Road, Pune")
 2. Go to dashboard
 3. See "FC Road, Pune" appear in Hotspots section
@@ -142,30 +146,35 @@ frontend/
 ## Evaluation Criteria Mapping
 
 ### Innovation (25%)
+
 - AI-powered classification and sentiment analysis
 - Duplicate detection algorithm
 - Predictive hotspot analytics
 - Multi-lingual support with translation
 
 ### Technical Implementation (25%)
+
 - Modern tech stack (React, Node.js, PostgreSQL)
 - Clean architecture (MVC pattern)
 - Error handling and fallbacks
 - Database optimization (indexes)
 
 ### Functionality (25%)
+
 - All 8 features working
 - End-to-end workflow complete
 - Real-time updates
 - File upload support
 
 ### UI/UX (15%)
+
 - Beautiful gradient design
 - Intuitive navigation
 - Responsive layout
 - Clear feedback messages
 
 ### Presentation (10%)
+
 - Clear documentation
 - Easy setup
 - Demo-ready
@@ -175,7 +184,7 @@ frontend/
 
 ## 30-Second Elevator Pitch
 
-"CivicSense uses AI to automatically classify, prioritize, and route civic complaints to the right government departments. Citizens can submit issues via text, voice, or images in their local language. The system detects duplicates, identifies problem hotspots, and helps officials respond faster to urgent issues like accidents and fires."
+"civicsense2 uses AI to automatically classify, prioritize, and route civic complaints to the right government departments. Citizens can submit issues via text, voice, or images in their local language. The system detects duplicates, identifies problem hotspots, and helps officials respond faster to urgent issues like accidents and fires."
 
 ---
 
@@ -213,6 +222,7 @@ A: We don't log sensitive data, use environment variables for credentials, and c
 ## Contact & Support
 
 **Documentation**:
+
 - README.md - Full setup guide
 - FEATURE_REPORT.md - Detailed features
 - SCREENSHOTS.md - Screenshot guide
@@ -230,6 +240,6 @@ A: We don't log sensitive data, use environment variables for credentials, and c
 
 ## One-Line Summary
 
-**CivicSense: AI-powered civic complaint management with multi-channel input, automatic classification, smart routing, duplicate detection, and predictive hotspot analytics.**
+**civicsense2: AI-powered civic complaint management with multi-channel input, automatic classification, smart routing, duplicate detection, and predictive hotspot analytics.**
 
 🎯 **All Features Implemented | Production Ready | Demo Ready**

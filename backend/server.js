@@ -7,18 +7,26 @@ const app = express();
 
 app.use(cors());
 app.use(express.json());
-app.use('/uploads', express.static('uploads'));
+app.use("/uploads", express.static("uploads"));
 
+app.use("/api/auth", require("./routes/authRoutes"));
 app.use("/api/complaints", require("./routes/complaintRoutes"));
 
-app.get('/', (req, res) => {
-  res.json({ message: 'CivicSense API Running' });
+const { testGemini } = require('./controllers/testController');
+app.get('/api/test-gemini', testGemini);
+
+app.get("/", (req, res) => {
+  res.json({ message: "civicsense2 API Running" });
 });
 
-app.get('/api/test', async (req, res) => {
+app.get("/api/test", async (req, res) => {
   try {
-    const result = await pool.query('SELECT NOW()');
-    res.json({ success: true, message: 'Database connected', time: result.rows[0] });
+    const result = await pool.query("SELECT NOW()");
+    res.json({
+      success: true,
+      message: "Database connected",
+      time: result.rows[0],
+    });
   } catch (error) {
     res.json({ success: false, error: error.message });
   }

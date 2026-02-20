@@ -1,29 +1,52 @@
-import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
-import Home from './pages/Home';
-import Team from './pages/Team';
-import ComplaintForm from './components/ComplaintForm';
-import Dashboard from './components/Dashboard';
-import './App.css';
+import { BrowserRouter as Router, Routes, Route, Link, Navigate } from "react-router-dom";
+import LandingPage from "./pages/LandingPage";
+import Home from "./pages/Home";
+import Team from "./pages/Team";
+import TrackComplaint from "./pages/TrackComplaint";
+import Login from "./pages/Login";
+import MyComplaints from "./pages/MyComplaints";
+import Profile from "./pages/Profile";
+import ComplaintForm from "./components/ComplaintForm";
+import Dashboard from "./components/Dashboard";
+import "./App.css";
 
 function App() {
+  const user = JSON.parse(localStorage.getItem("user") || "null");
+
   return (
     <Router>
       <div className="app">
-        <nav className="navbar">
-          <Link to="/" className="logo">🏛️ CivicSense</Link>
-          <div className="nav-links">
-            <Link to="/">Home</Link>
-            <Link to="/submit">Submit Complaint</Link>
-            <Link to="/dashboard">Dashboard</Link>
-            <Link to="/team">Our Team</Link>
-          </div>
-        </nav>
-        
+        {user && (
+          <nav className="navbar">
+            <Link to="/home" className="logo">
+              🏛️ CivicSense
+            </Link>
+            <div className="nav-links">
+              <Link to="/home">Home</Link>
+              {user.role === "citizen" && (
+                <>
+                  <Link to="/submit">Submit Complaint</Link>
+                  <Link to="/track">Track Complaint</Link>
+                  <Link to="/my-complaints">My Complaints</Link>
+                </>
+              )}
+              <Link to="/dashboard">Dashboard</Link>
+              <Link to="/profile">Profile</Link>
+              <Link to="/team">Our Team</Link>
+            </div>
+          </nav>
+        )}
+
         <main className="main-content">
           <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/submit" element={<ComplaintForm />} />
-            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/" element={user ? <Navigate to="/home" /> : <LandingPage />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/home" element={user ? <Home /> : <Navigate to="/" />} />
+            <Route path="/submit" element={user ? <ComplaintForm /> : <Navigate to="/login" />} />
+            <Route path="/track" element={<TrackComplaint />} />
+            <Route path="/my-complaints" element={user ? <MyComplaints /> : <Navigate to="/login" />} />
+            <Route path="/profile" element={user ? <Profile /> : <Navigate to="/login" />} />
+            <Route path="/dashboard" element={user ? <Dashboard /> : <Navigate to="/login" />} />
             <Route path="/team" element={<Team />} />
           </Routes>
         </main>

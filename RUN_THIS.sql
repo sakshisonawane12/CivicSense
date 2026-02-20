@@ -1,9 +1,11 @@
--- Create Database
+-- STEP 1: Create database (run this first)
 CREATE DATABASE civicsense2;
 
--- Connect to civicsense2 database and run below commands
+-- STEP 2: Connect to civicsense2 database in pgAdmin
+-- (Right-click civicsense2 → Query Tool)
 
--- Users Table (for authentication)
+-- STEP 3: Run everything below in the Query Tool
+
 CREATE TABLE users (
     id SERIAL PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
@@ -15,7 +17,6 @@ CREATE TABLE users (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Complaints Table
 CREATE TABLE complaints (
     id SERIAL PRIMARY KEY,
     citizen_name VARCHAR(255),
@@ -37,7 +38,6 @@ CREATE TABLE complaints (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Departments Table
 CREATE TABLE departments (
     id SERIAL PRIMARY KEY,
     name VARCHAR(100) NOT NULL,
@@ -46,19 +46,16 @@ CREATE TABLE departments (
     phone VARCHAR(20)
 );
 
--- Insert sample departments
 INSERT INTO departments (name, category, email, phone) VALUES
 ('Sanitation Department', 'Sanitation', 'sanitation@civic.gov', '1234567890'),
 ('Public Works Department', 'Infrastructure', 'pwd@civic.gov', '1234567891'),
 ('Police Department', 'Safety', 'police@civic.gov', '1234567892');
 
--- Insert department users (password: admin123)
 INSERT INTO users (name, email, phone, password, role, department_name) VALUES
 ('Sanitation Dept', 'sanitation@civic.gov', '1234567890', '$2b$10$eIBd0tOYsNiaa0YrgGdwvuw3cMzr9czLTj8s2QDnZ2UZm1RToHZLq', 'department', 'Sanitation Department'),
 ('Public Works Dept', 'pwd@civic.gov', '1234567891', '$2b$10$eIBd0tOYsNiaa0YrgGdwvuw3cMzr9czLTj8s2QDnZ2UZm1RToHZLq', 'department', 'Public Works Department'),
 ('Police Dept', 'police@civic.gov', '1234567892', '$2b$10$eIBd0tOYsNiaa0YrgGdwvuw3cMzr9czLTj8s2QDnZ2UZm1RToHZLq', 'department', 'Police Department');
 
--- Hotspots Analytics Table
 CREATE TABLE hotspots (
     id SERIAL PRIMARY KEY,
     location VARCHAR(255),
@@ -68,7 +65,6 @@ CREATE TABLE hotspots (
     UNIQUE(location, category)
 );
 
--- Indexes for better performance
 CREATE INDEX idx_complaints_category ON complaints(category);
 CREATE INDEX idx_complaints_priority ON complaints(priority);
 CREATE INDEX idx_complaints_status ON complaints(status);

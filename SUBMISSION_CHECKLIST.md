@@ -3,6 +3,7 @@
 ## Pre-Submission Requirements
 
 ### 1. Code Repository ✅
+
 - [ ] All code pushed to GitHub/GitLab repository
 - [ ] Only commits within hackathon timeline
 - [ ] Only registered team members as collaborators
@@ -10,6 +11,7 @@
 - [ ] Repository is private/public as per guidelines
 
 ### 2. README.md ✅
+
 - [x] Project overview included
 - [x] Setup and installation instructions
 - [x] Usage instructions
@@ -20,6 +22,7 @@
 - [x] Troubleshooting guide
 
 ### 3. Documentation ✅
+
 - [x] FEATURE_REPORT.md - Detailed feature documentation
 - [x] SCREENSHOTS.md - Screenshot capture guide
 - [x] README.md - Main project documentation
@@ -27,6 +30,7 @@
 - [x] .env.example - Environment variables template
 
 ### 4. Code Quality ✅
+
 - [x] Clean, readable code
 - [x] Proper file structure
 - [x] Comments where necessary
@@ -35,6 +39,7 @@
 - [x] Environment variables used
 
 ### 5. Features Implementation ✅
+
 - [x] All MVP features working
 - [x] All bonus features working
 - [x] AI/NLP integration functional
@@ -43,12 +48,14 @@
 - [x] Backend API tested
 
 ### 6. Testing ✅
+
 - [x] All features tested locally
 - [x] Test cases documented in README
 - [x] Sample data provided
 - [x] Error scenarios handled
 
 ### 7. Presentation Preparation
+
 - [ ] Screenshots captured (follow SCREENSHOTS.md)
 - [ ] Demo video recorded (2-3 minutes)
 - [ ] Presentation slides created
@@ -56,6 +63,7 @@
 - [ ] Practice run completed
 
 ### 8. Offline Venue Requirements
+
 - [ ] All team members confirmed attendance
 - [ ] Venue location noted
 - [ ] Presentation date/time confirmed
@@ -67,6 +75,7 @@
 ## Final Checks Before Submission
 
 ### Code Repository
+
 ```bash
 # Verify all files are committed
 git status
@@ -82,6 +91,7 @@ git push origin main
 ```
 
 ### Local Testing
+
 ```bash
 # Backend
 cd backend
@@ -107,6 +117,7 @@ npm run dev
 ```
 
 ### Database Verification
+
 ```sql
 -- In pgAdmin, verify tables exist:
 SELECT * FROM complaints;
@@ -118,6 +129,7 @@ SELECT COUNT(*) FROM complaints;
 ```
 
 ### Environment Variables
+
 ```bash
 # Verify .env file exists in backend/
 # Contains:
@@ -133,8 +145,9 @@ SELECT COUNT(*) FROM complaints;
 ## Presentation Checklist
 
 ### Slides Content
+
 1. **Title Slide**
-   - Project name: CivicSense
+   - Project name: civicsense2
    - Tagline: AI-Driven Issue Redressal & Prioritization
    - Team name and members
    - DevCraft 2026
@@ -191,6 +204,7 @@ SELECT COUNT(*) FROM complaints;
     - Q&A
 
 ### Demo Preparation
+
 - [ ] Practice demo 3-5 times
 - [ ] Time demo (should be 2-3 minutes)
 - [ ] Prepare backup video in case of technical issues
@@ -199,6 +213,7 @@ SELECT COUNT(*) FROM complaints;
 - [ ] Clear browser cache before demo
 
 ### Speaking Points
+
 **Member 1**: Introduction & Problem Statement (1 min)
 **Member 2**: Solution & Features (2 min)
 **Member 3**: Live Demo (2-3 min)
@@ -210,6 +225,7 @@ SELECT COUNT(*) FROM complaints;
 ## Day Before Submission
 
 ### Technical
+
 - [ ] Final code push to repository
 - [ ] Verify repository access for judges
 - [ ] Test clone and setup on fresh machine
@@ -217,12 +233,14 @@ SELECT COUNT(*) FROM complaints;
 - [ ] Export database schema
 
 ### Documentation
+
 - [ ] Proofread README.md
 - [ ] Check all links work
 - [ ] Verify screenshots are clear
 - [ ] Update team information
 
 ### Presentation
+
 - [ ] Finalize slides
 - [ ] Record backup demo video
 - [ ] Test presentation on venue laptop (if possible)
@@ -230,6 +248,7 @@ SELECT COUNT(*) FROM complaints;
 - [ ] Prepare answers for common questions
 
 ### Team Coordination
+
 - [ ] Confirm all members available
 - [ ] Assign presentation roles
 - [ ] Share presentation file with all members
@@ -284,6 +303,7 @@ SELECT COUNT(*) FROM complaints;
 **Presentation Lead**: [Name] - [Phone]
 
 **Backup Plans**:
+
 - If internet fails: Use recorded demo video
 - If laptop fails: Have backup laptop with code
 - If database fails: Use screenshots and explain
@@ -304,6 +324,7 @@ SELECT COUNT(*) FROM complaints;
 ## Disqualification Risks to Avoid
 
 ❌ **DO NOT**:
+
 - Push code outside hackathon timeline
 - Add external collaborators
 - Miss offline presentation
@@ -313,6 +334,7 @@ SELECT COUNT(*) FROM complaints;
 - Use pre-built solutions
 
 ✅ **DO**:
+
 - Follow all guidelines
 - Be respectful to organizers and teams
 - Arrive on time

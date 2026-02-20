@@ -1,9 +1,15 @@
--- Create Database
+# 🚀 COMPLETE SETUP GUIDE
+
+## Step 1: Update Database (5 minutes)
+
+Open **pgAdmin** → Connect to PostgreSQL → Run this SQL:
+
+```sql
+-- Create new database
 CREATE DATABASE civicsense2;
 
--- Connect to civicsense2 database and run below commands
+-- Connect to civicsense2 and run:
 
--- Users Table (for authentication)
 CREATE TABLE users (
     id SERIAL PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
@@ -15,7 +21,6 @@ CREATE TABLE users (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Complaints Table
 CREATE TABLE complaints (
     id SERIAL PRIMARY KEY,
     citizen_name VARCHAR(255),
@@ -37,7 +42,6 @@ CREATE TABLE complaints (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Departments Table
 CREATE TABLE departments (
     id SERIAL PRIMARY KEY,
     name VARCHAR(100) NOT NULL,
@@ -46,19 +50,16 @@ CREATE TABLE departments (
     phone VARCHAR(20)
 );
 
--- Insert sample departments
 INSERT INTO departments (name, category, email, phone) VALUES
 ('Sanitation Department', 'Sanitation', 'sanitation@civic.gov', '1234567890'),
 ('Public Works Department', 'Infrastructure', 'pwd@civic.gov', '1234567891'),
 ('Police Department', 'Safety', 'police@civic.gov', '1234567892');
 
--- Insert department users (password: admin123)
 INSERT INTO users (name, email, phone, password, role, department_name) VALUES
 ('Sanitation Dept', 'sanitation@civic.gov', '1234567890', '$2b$10$eIBd0tOYsNiaa0YrgGdwvuw3cMzr9czLTj8s2QDnZ2UZm1RToHZLq', 'department', 'Sanitation Department'),
 ('Public Works Dept', 'pwd@civic.gov', '1234567891', '$2b$10$eIBd0tOYsNiaa0YrgGdwvuw3cMzr9czLTj8s2QDnZ2UZm1RToHZLq', 'department', 'Public Works Department'),
 ('Police Dept', 'police@civic.gov', '1234567892', '$2b$10$eIBd0tOYsNiaa0YrgGdwvuw3cMzr9czLTj8s2QDnZ2UZm1RToHZLq', 'department', 'Police Department');
 
--- Hotspots Analytics Table
 CREATE TABLE hotspots (
     id SERIAL PRIMARY KEY,
     location VARCHAR(255),
@@ -68,10 +69,67 @@ CREATE TABLE hotspots (
     UNIQUE(location, category)
 );
 
--- Indexes for better performance
 CREATE INDEX idx_complaints_category ON complaints(category);
 CREATE INDEX idx_complaints_priority ON complaints(priority);
 CREATE INDEX idx_complaints_status ON complaints(status);
 CREATE INDEX idx_complaints_location ON complaints(location);
 CREATE INDEX idx_complaints_created_at ON complaints(created_at);
 CREATE INDEX idx_complaints_user_id ON complaints(user_id);
+```
+
+## Step 2: Update Backend .env
+
+Edit `backend/.env`:
+
+```
+PORT=5000
+DB_HOST=localhost
+DB_PORT=5432
+DB_NAME=civicsense2
+DB_USER=postgres
+DB_PASSWORD=srushti@2026#DB
+GEMINI_API_KEY=AIzaSyBeBFyMCeCyGaKWA9hzbBp_UQi-lKDJexc
+JWT_SECRET=civicsense_secret_key_2026
+```
+
+## Step 3: Restart Backend
+
+```bash
+cd backend
+npm run dev
+```
+
+## Step 4: Test
+
+1. Go to: http://localhost:5173/
+2. You'll see the new landing page
+3. Click "Login as Citizen" or "Login as Department"
+4. Test login with: sanitation@civic.gov / admin123
+
+## 🎯 NEW FEATURES
+
+✅ Creative landing page with role selection
+✅ Separate citizen and department portals
+✅ Profile page
+✅ Protected routes (must login)
+✅ Role-based navigation
+✅ Department users can update complaint status
+
+## 📱 DEMO ACCOUNTS
+
+**Department:**
+- sanitation@civic.gov / admin123
+- pwd@civic.gov / admin123
+- police@civic.gov / admin123
+
+**Citizen:**
+- Register new account at /login
+
+## 🎤 DEMO FLOW
+
+1. **Landing Page** → Shows two portals
+2. **Citizen Login** → Register → Submit complaint → View in "My Complaints"
+3. **Department Login** → View dashboard → Update status to "in-progress" or "resolved"
+4. **Profile** → View user details → Logout
+
+Done! 🚀

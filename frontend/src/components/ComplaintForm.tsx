@@ -14,6 +14,7 @@ export default function ComplaintForm() {
   const [audio, setAudio] = useState(null);
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [complaintId, setComplaintId] = useState(null);
   const [recording, setRecording] = useState(false);
 
   const handleSubmit = async (e) => {
@@ -26,14 +27,16 @@ export default function ComplaintForm() {
     if (audio) data.append('audio', audio);
 
     try {
-      await complaintService.createComplaint(data);
+      const response = await complaintService.createComplaint(data);
+      setComplaintId(response.complaint.id);
       setSuccess(true);
       setTimeout(() => {
         setSuccess(false);
+        setComplaintId(null);
         setFormData({ citizen_name: '', citizen_phone: '', complaint_text: '', location: '', language: 'en' });
         setImage(null);
         setAudio(null);
-      }, 3000);
+      }, 5000);
     } catch (error) {
       alert('Error submitting complaint');
     } finally {
@@ -70,8 +73,12 @@ export default function ComplaintForm() {
     return (
       <div className="success-message">
         <CheckCircle size={64} color="#10b981" />
-        <h2>Complaint Submitted Successfully!</h2>
-        <p>Your complaint has been registered and will be processed soon.</p>
+        <h2 style={{color: '#10b981'}}>Complaint Submitted Successfully!</h2>
+        <div style={{background: '#f0fdf4', padding: '1rem', borderRadius: '10px', margin: '1rem 0'}}>
+          <p style={{color: '#166534', fontWeight: 'bold', fontSize: '1.2rem'}}>Your Complaint ID: #{complaintId}</p>
+          <p style={{color: '#15803d', marginTop: '0.5rem'}}>Save this ID to track your complaint</p>
+        </div>
+        <p style={{color: '#666'}}>Your complaint has been registered and will be processed soon.</p>
       </div>
     );
   }
@@ -101,13 +108,24 @@ export default function ComplaintForm() {
           required
           rows={5}
         />
-        <input
-          type="text"
-          placeholder="Location"
+        <select
           value={formData.location}
           onChange={(e) => setFormData({ ...formData, location: e.target.value })}
           required
-        />
+          style={{padding: '1rem', border: '2px solid #e5e7eb', borderRadius: '10px', fontSize: '1rem'}}
+        >
+          <option value="">Select Location in Pune</option>
+          <option value="Shivaji Nagar, Pune">Shivaji Nagar</option>
+          <option value="Kothrud, Pune">Kothrud</option>
+          <option value="Deccan, Pune">Deccan</option>
+          <option value="FC Road, Pune">FC Road</option>
+          <option value="MG Road, Pune">MG Road</option>
+          <option value="Hadapsar, Pune">Hadapsar</option>
+          <option value="Wakad, Pune">Wakad</option>
+          <option value="Hinjewadi, Pune">Hinjewadi</option>
+          <option value="Baner, Pune">Baner</option>
+          <option value="Aundh, Pune">Aundh</option>
+        </select>
         <select
           value={formData.language}
           onChange={(e) => setFormData({ ...formData, language: e.target.value })}

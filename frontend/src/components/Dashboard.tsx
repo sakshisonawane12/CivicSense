@@ -1,12 +1,16 @@
-import { useState, useEffect } from 'react';
-import { complaintService } from '../services/api';
-import { AlertCircle, TrendingUp, CheckCircle2, Clock } from 'lucide-react';
+import { useState, useEffect } from "react";
+import { complaintService } from "../services/api";
+import { AlertCircle, TrendingUp, CheckCircle2, Clock } from "lucide-react";
 
 export default function Dashboard() {
   const [complaints, setComplaints] = useState([]);
   const [stats, setStats] = useState(null);
   const [hotspots, setHotspots] = useState([]);
-  const [filter, setFilter] = useState({ department: '', priority: '', status: '' });
+  const [filter, setFilter] = useState({
+    department: "",
+    priority: "",
+    status: "",
+  });
 
   useEffect(() => {
     loadData();
@@ -17,13 +21,13 @@ export default function Dashboard() {
       const [complaintsData, statsData, hotspotsData] = await Promise.all([
         complaintService.getAllComplaints(filter),
         complaintService.getStats(),
-        complaintService.getHotspots()
+        complaintService.getHotspots(),
       ]);
       setComplaints(complaintsData.complaints);
       setStats(statsData.stats);
       setHotspots(hotspotsData.hotspots);
     } catch (error) {
-      console.error('Error loading data:', error);
+      console.error("Error loading data:", error);
     }
   };
 
@@ -32,22 +36,26 @@ export default function Dashboard() {
       await complaintService.updateStatus(id, status);
       loadData();
     } catch (error) {
-      alert('Error updating status');
+      alert("Error updating status");
     }
   };
 
   const getPriorityColor = (priority) => {
     switch (priority) {
-      case 'High': return '#ef4444';
-      case 'Medium': return '#f59e0b';
-      case 'Low': return '#10b981';
-      default: return '#6b7280';
+      case "High":
+        return "#ef4444";
+      case "Medium":
+        return "#f59e0b";
+      case "Low":
+        return "#10b981";
+      default:
+        return "#6b7280";
     }
   };
 
   return (
     <div className="dashboard">
-      <h1>CivicSense Dashboard</h1>
+      <h1>Dashboard</h1>
 
       {stats && (
         <div className="stats-grid">
@@ -83,19 +91,28 @@ export default function Dashboard() {
       )}
 
       <div className="filters">
-        <select value={filter.priority} onChange={(e) => setFilter({ ...filter, priority: e.target.value })}>
+        <select
+          value={filter.priority}
+          onChange={(e) => setFilter({ ...filter, priority: e.target.value })}
+        >
           <option value="">All Priorities</option>
           <option value="High">High</option>
           <option value="Medium">Medium</option>
           <option value="Low">Low</option>
         </select>
-        <select value={filter.status} onChange={(e) => setFilter({ ...filter, status: e.target.value })}>
+        <select
+          value={filter.status}
+          onChange={(e) => setFilter({ ...filter, status: e.target.value })}
+        >
           <option value="">All Status</option>
           <option value="pending">Pending</option>
           <option value="in_progress">In Progress</option>
           <option value="resolved">Resolved</option>
         </select>
-        <select value={filter.department} onChange={(e) => setFilter({ ...filter, department: e.target.value })}>
+        <select
+          value={filter.department}
+          onChange={(e) => setFilter({ ...filter, department: e.target.value })}
+        >
           <option value="">All Departments</option>
           <option value="Sanitation Department">Sanitation</option>
           <option value="Public Works Department">Infrastructure</option>
@@ -110,7 +127,12 @@ export default function Dashboard() {
             {complaints.map((complaint) => (
               <div key={complaint.id} className="complaint-card">
                 <div className="complaint-header">
-                  <span className="category-badge" style={{ backgroundColor: getPriorityColor(complaint.priority) }}>
+                  <span
+                    className="category-badge"
+                    style={{
+                      backgroundColor: getPriorityColor(complaint.priority),
+                    }}
+                  >
                     {complaint.priority}
                   </span>
                   <span className="category">{complaint.category}</span>
@@ -143,7 +165,9 @@ export default function Dashboard() {
               <div key={idx} className="hotspot-card">
                 <div className="hotspot-location">📍 {hotspot.location}</div>
                 <div className="hotspot-category">{hotspot.category}</div>
-                <div className="hotspot-count">{hotspot.complaint_count} complaints</div>
+                <div className="hotspot-count">
+                  {hotspot.complaint_count} complaints
+                </div>
               </div>
             ))}
           </div>

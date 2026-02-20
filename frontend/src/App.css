@@ -99,12 +99,16 @@ body {
 }
 
 .feature-card h3 {
-  color: #333;
+  color: #1f2937;
   margin: 1rem 0;
+  font-weight: 700;
+  font-size: 1.3rem;
 }
 
 .feature-card p {
-  color: #666;
+  color: #374151;
+  line-height: 1.6;
+  font-size: 1rem;
 }
 
 .cta-buttons {
@@ -198,11 +202,14 @@ body {
   border-radius: 10px;
   cursor: pointer;
   transition: all 0.3s;
+  color: #374151;
+  background: white;
 }
 
 .file-label:hover {
   border-color: #667eea;
   background: #f9fafb;
+  color: #667eea;
 }
 
 .file-label input {
@@ -280,13 +287,15 @@ body {
 
 /* Dashboard */
 .dashboard {
-  color: white;
+  color: #1f2937;
 }
 
 .dashboard h1 {
   text-align: center;
   margin-bottom: 2rem;
   font-size: 2.5rem;
+  color: white;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
 }
 
 .stats-grid {
@@ -400,8 +409,9 @@ body {
   gap: 1rem;
   flex-wrap: wrap;
   font-size: 0.875rem;
-  color: #666;
+  color: #374151;
   margin-bottom: 1rem;
+  font-weight: 500;
 }
 
 .complaint-actions select {
@@ -426,19 +436,22 @@ body {
 
 .hotspot-location {
   font-weight: bold;
-  color: #333;
+  color: #1f2937;
   margin-bottom: 0.5rem;
+  font-size: 1rem;
 }
 
 .hotspot-category {
-  color: #666;
+  color: #374151;
   font-size: 0.875rem;
   margin-bottom: 0.25rem;
+  font-weight: 500;
 }
 
 .hotspot-count {
-  color: #f59e0b;
+  color: #b45309;
   font-weight: bold;
+  font-size: 0.95rem;
 }
 
 @media (max-width: 768px) {
