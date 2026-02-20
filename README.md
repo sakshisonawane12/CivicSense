@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # civicsense2 - AI-Driven Issue Redressal & Prioritization
 
 ![Project Status](https://img.shields.io/badge/Status-Complete-success)
@@ -655,3 +656,7 @@ For any queries or issues:
 **Last Updated**: February 2026
 
 **DevCraft Hackathon 2026**
+=======
+# CivicSense
+An AI-driven Municipal Complaint Intelligence System designed to make urban governance faster, smarter, and more responsive by automating the entire complaint lifecycle  from submission to resolution.
+>>>>>>> 03fcf75cfe1aa6098833b8d7dbd2873770dd7e82
