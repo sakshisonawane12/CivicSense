@@ -1,9 +1,6 @@
--- Create Database
-CREATE DATABASE civicsense2;
+-- CivicSense Database Setup
+-- Run in pgAdmin after creating civicsense2 database
 
--- Connect to civicsense2 database and run below commands
-
--- Users Table (for authentication)
 CREATE TABLE users (
     id SERIAL PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
@@ -12,10 +9,13 @@ CREATE TABLE users (
     password VARCHAR(255) NOT NULL,
     role VARCHAR(20) DEFAULT 'citizen' CHECK (role IN ('citizen', 'department')),
     department_name VARCHAR(100),
+    points INTEGER DEFAULT 0,
+    badges TEXT[] DEFAULT '{}',
+    complaints_count INTEGER DEFAULT 0,
+    resolved_count INTEGER DEFAULT 0,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Complaints Table
 CREATE TABLE complaints (
     id SERIAL PRIMARY KEY,
     citizen_name VARCHAR(255),
@@ -37,7 +37,6 @@ CREATE TABLE complaints (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Departments Table
 CREATE TABLE departments (
     id SERIAL PRIMARY KEY,
     name VARCHAR(100) NOT NULL,
@@ -46,19 +45,6 @@ CREATE TABLE departments (
     phone VARCHAR(20)
 );
 
--- Insert sample departments
-INSERT INTO departments (name, category, email, phone) VALUES
-('Sanitation Department', 'Sanitation', 'sanitation@civic.gov', '1234567890'),
-('Public Works Department', 'Infrastructure', 'pwd@civic.gov', '1234567891'),
-('Police Department', 'Safety', 'police@civic.gov', '1234567892');
-
--- Insert department users (password: admin123)
-INSERT INTO users (name, email, phone, password, role, department_name) VALUES
-('Sanitation Dept', 'sanitation@civic.gov', '1234567890', '$2b$10$eIBd0tOYsNiaa0YrgGdwvuw3cMzr9czLTj8s2QDnZ2UZm1RToHZLq', 'department', 'Sanitation Department'),
-('Public Works Dept', 'pwd@civic.gov', '1234567891', '$2b$10$eIBd0tOYsNiaa0YrgGdwvuw3cMzr9czLTj8s2QDnZ2UZm1RToHZLq', 'department', 'Public Works Department'),
-('Police Dept', 'police@civic.gov', '1234567892', '$2b$10$eIBd0tOYsNiaa0YrgGdwvuw3cMzr9czLTj8s2QDnZ2UZm1RToHZLq', 'department', 'Police Department');
-
--- Hotspots Analytics Table
 CREATE TABLE hotspots (
     id SERIAL PRIMARY KEY,
     location VARCHAR(255),
@@ -68,10 +54,22 @@ CREATE TABLE hotspots (
     UNIQUE(location, category)
 );
 
--- Indexes for better performance
+-- Indexes
 CREATE INDEX idx_complaints_category ON complaints(category);
 CREATE INDEX idx_complaints_priority ON complaints(priority);
 CREATE INDEX idx_complaints_status ON complaints(status);
 CREATE INDEX idx_complaints_location ON complaints(location);
 CREATE INDEX idx_complaints_created_at ON complaints(created_at);
 CREATE INDEX idx_complaints_user_id ON complaints(user_id);
+
+-- Sample departments
+INSERT INTO departments (name, category, email, phone) VALUES
+('Sanitation Department', 'Sanitation', 'sanitation@civic.gov', '1234567890'),
+('Public Works Department', 'Infrastructure', 'pwd@civic.gov', '1234567891'),
+('Police Department', 'Safety', 'police@civic.gov', '1234567892');
+
+-- Department users (password: admin123)
+INSERT INTO users (name, email, phone, password, role, department_name) VALUES
+('Sanitation Dept', 'sanitation@civic.gov', '1234567890', '$2b$10$eIBd0tOYsNiaa0YrgGdwvuw3cMzr9czLTj8s2QDnZ2UZm1RToHZLq', 'department', 'Sanitation Department'),
+('Public Works Dept', 'pwd@civic.gov', '1234567891', '$2b$10$eIBd0tOYsNiaa0YrgGdwvuw3cMzr9czLTj8s2QDnZ2UZm1RToHZLq', 'department', 'Public Works Department'),
+('Police Dept', 'police@civic.gov', '1234567892', '$2b$10$eIBd0tOYsNiaa0YrgGdwvuw3cMzr9czLTj8s2QDnZ2UZm1RToHZLq', 'department', 'Police Department');

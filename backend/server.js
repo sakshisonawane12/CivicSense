@@ -11,6 +11,7 @@ app.use("/uploads", express.static("uploads"));
 
 app.use("/api/auth", require("./routes/authRoutes"));
 app.use("/api/complaints", require("./routes/complaintRoutes"));
+app.use("/api/rewards", require("./routes/rewardsRoutes"));
 
 const { testGemini } = require('./controllers/testController');
 app.get('/api/test-gemini', testGemini);

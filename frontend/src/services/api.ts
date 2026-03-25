@@ -4,9 +4,10 @@ const API_URL = 'http://localhost:5000/api';
 
 export const complaintService = {
   createComplaint: async (formData) => {
-    const response = await axios.post(`${API_URL}/complaints`, formData, {
-      headers: { 'Content-Type': 'multipart/form-data' }
-    });
+    const token = localStorage.getItem('token');
+    const headers: any = { 'Content-Type': 'multipart/form-data' };
+    if (token) headers['Authorization'] = `Bearer ${token}`;
+    const response = await axios.post(`${API_URL}/complaints`, formData, { headers });
     return response.data;
   },
 

@@ -1,5 +1,6 @@
 const pool = require('../config/db');
 const { classifyComplaint, analyzeSentiment, translateText, detectDuplicates } = require('../services/aiService');
+const { awardComplaintPoints, awardResolutionPoints } = require('./rewardsController');
 
 const DEPARTMENT_MAP = {
   'Sanitation': 'Sanitation Department',
@@ -53,6 +54,7 @@ exports.createComplaint = async (req, res) => {
     );
 
     await updateHotspots(location, category);
+    if (userId) await awardComplaintPoints(userId);
 
     console.log('Complaint created successfully');
     res.status(201).json({
@@ -107,6 +109,10 @@ exports.updateComplaintStatus = async (req, res) => {
       'UPDATE complaints SET status = $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2 RETURNING *',
       [status, id]
     );
+
+    if (status === 'resolved' && result.rows[0]?.user_id) {
+      await awardResolutionPoints(result.rows[0].user_id);
+    }
 
     res.json({ success: true, complaint: result.rows[0] });
   } catch (error) {

@@ -1,193 +1,129 @@
-import { useState, useEffect } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
-import axios from "axios";
+import { useState, useEffect } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import axios from 'axios';
 
-const API_URL = "http://localhost:5000/api/auth";
+const API_URL = 'http://localhost:5000/api/auth';
+
+const inputStyle: React.CSSProperties = {
+  width: '100%', padding: '0.875rem 1rem', background: 'rgba(255,255,255,0.07)',
+  border: '1px solid rgba(255,255,255,0.15)', borderRadius: '12px', color: 'white',
+  fontSize: '1rem', fontFamily: 'Inter,sans-serif', outline: 'none', boxSizing: 'border-box',
+};
+
+const labelStyle: React.CSSProperties = {
+  display: 'block', fontSize: '0.85rem', fontWeight: 600,
+  color: 'rgba(255,255,255,0.7)', marginBottom: '0.4rem',
+};
 
 export default function Login() {
   const [isLogin, setIsLogin] = useState(true);
   const [searchParams] = useSearchParams();
-  const roleParam = searchParams.get("role");
-
-  const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    phone: "",
-    password: "",
-    role: roleParam || "citizen",
-  });
-  const [error, setError] = useState("");
+  const roleParam = searchParams.get('role');
+  const [formData, setFormData] = useState({ name: '', email: '', phone: '', password: '', role: roleParam || 'citizen' });
+  const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (roleParam) {
-      setFormData((prev) => ({ ...prev, role: roleParam }));
-    }
+    if (roleParam) setFormData(prev => ({ ...prev, role: roleParam }));
   }, [roleParam]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    setError("");
-
+    setError('');
     try {
-      const endpoint = isLogin ? "/login" : "/register";
+      const endpoint = isLogin ? '/login' : '/register';
       const response = await axios.post(`${API_URL}${endpoint}`, formData);
-
-      localStorage.setItem("token", response.data.token);
-      localStorage.setItem("user", JSON.stringify(response.data.user));
-
-      if (response.data.user.role === "department") {
-        navigate("/dashboard");
-      } else {
-        navigate("/home");
-      }
+      localStorage.setItem('token', response.data.token);
+      localStorage.setItem('user', JSON.stringify(response.data.user));
+      if (response.data.user.role === 'department') navigate('/dashboard');
+      else navigate('/home');
       window.location.reload();
     } catch (err: any) {
-      setError(err.response?.data?.error || "Authentication failed");
+      setError(err.response?.data?.error || 'Authentication failed');
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-900 flex items-center justify-center py-12 px-4">
-      <div className="max-w-md w-full bg-white/10 backdrop-blur-lg rounded-3xl shadow-2xl p-8 border-2 border-white/20">
-        <h2 className="text-4xl font-bold text-center text-white mb-2">
-          {isLogin ? "Welcome Back" : "Create Account"}
-        </h2>
-        <p className="text-center text-purple-200 mb-6">
-          {formData.role === "department"
-            ? "Department Portal"
-            : "Citizen Portal"}
-        </p>
+    <div style={{ minHeight: '100vh', background: 'linear-gradient(135deg,#0f0c29 0%,#302b63 50%,#24243e 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem', fontFamily: 'Inter,sans-serif' }}>
+      <div style={{ width: '100%', maxWidth: '440px', background: 'rgba(255,255,255,0.06)', backdropFilter: 'blur(20px)', borderRadius: '24px', padding: '2.5rem', border: '1px solid rgba(255,255,255,0.12)', boxShadow: '0 25px 50px rgba(0,0,0,0.5)' }}>
+
+        {/* Header */}
+        <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
+          <div style={{ fontSize: '2.5rem', marginBottom: '0.5rem' }}>
+            {formData.role === 'department' ? '🏢' : '👤'}
+          </div>
+          <h2 style={{ fontSize: '1.75rem', fontWeight: 800, color: 'white', margin: '0 0 0.25rem' }}>
+            {isLogin ? 'Welcome Back' : 'Create Account'}
+          </h2>
+          <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.9rem' }}>
+            {formData.role === 'department' ? 'Department Portal' : 'Citizen Portal'}
+          </p>
+        </div>
 
         {error && (
-          <div className="bg-red-500/20 border border-red-500 text-white px-4 py-3 rounded-lg mb-4">
+          <div style={{ background: 'rgba(239,68,68,0.15)', border: '1px solid rgba(239,68,68,0.4)', color: '#fca5a5', padding: '0.75rem 1rem', borderRadius: '10px', marginBottom: '1.25rem', fontSize: '0.9rem' }}>
             {error}
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
           {!isLogin && (
             <div>
-              <label className="block text-sm font-medium text-purple-200 mb-1">
-                Name
-              </label>
-              <input
-                type="text"
-                value={formData.name}
-                onChange={(e) =>
-                  setFormData({ ...formData, name: e.target.value })
-                }
-                className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-purple-300 focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                placeholder="Enter your name"
-                required={!isLogin}
-              />
+              <label style={labelStyle}>Name</label>
+              <input style={inputStyle} type="text" value={formData.name} onChange={e => setFormData({ ...formData, name: e.target.value })} placeholder="Enter your name" required={!isLogin} />
             </div>
           )}
-
           <div>
-            <label className="block text-sm font-medium text-purple-200 mb-1">
-              Email
-            </label>
-            <input
-              type="email"
-              value={formData.email}
-              onChange={(e) =>
-                setFormData({ ...formData, email: e.target.value })
-              }
-              className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-purple-300 focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-              placeholder="Enter your email"
-              required
-            />
+            <label style={labelStyle}>Email</label>
+            <input style={inputStyle} type="email" value={formData.email} onChange={e => setFormData({ ...formData, email: e.target.value })} placeholder="Enter your email" required />
           </div>
-
           {!isLogin && (
             <div>
-              <label className="block text-sm font-medium text-purple-200 mb-1">
-                Phone
-              </label>
-              <input
-                type="tel"
-                value={formData.phone}
-                onChange={(e) =>
-                  setFormData({ ...formData, phone: e.target.value })
-                }
-                className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-purple-300 focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                placeholder="Enter your phone"
-              />
+              <label style={labelStyle}>Phone</label>
+              <input style={inputStyle} type="tel" value={formData.phone} onChange={e => setFormData({ ...formData, phone: e.target.value })} placeholder="Enter your phone" />
             </div>
           )}
-
           <div>
-            <label className="block text-sm font-medium text-purple-200 mb-1">
-              Password
-            </label>
-            <input
-              type="password"
-              value={formData.password}
-              onChange={(e) =>
-                setFormData({ ...formData, password: e.target.value })
-              }
-              className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-purple-300 focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-              placeholder="Enter your password"
-              required
-            />
+            <label style={labelStyle}>Password</label>
+            <input style={inputStyle} type="password" value={formData.password} onChange={e => setFormData({ ...formData, password: e.target.value })} placeholder="Enter your password" required />
           </div>
-
           {!isLogin && (
             <div>
-              <label className="block text-sm font-medium text-purple-200 mb-1">
-                Role
-              </label>
-              <select
-                value={formData.role}
-                onChange={(e) =>
-                  setFormData({ ...formData, role: e.target.value })
-                }
-                className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-              >
-                <option value="citizen" className="bg-gray-800">
-                  Citizen
-                </option>
-                <option value="department" className="bg-gray-800">
-                  Department
-                </option>
+              <label style={labelStyle}>Role</label>
+              <select style={{ ...inputStyle, cursor: 'pointer' }} value={formData.role} onChange={e => setFormData({ ...formData, role: e.target.value })}>
+                <option value="citizen" style={{ background: '#1e1b4b' }}>👤 Citizen</option>
+                <option value="department" style={{ background: '#1e1b4b' }}>🏢 Department</option>
               </select>
             </div>
           )}
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full bg-gradient-to-r from-purple-500 to-pink-500 text-white py-3 rounded-xl hover:from-purple-600 hover:to-pink-600 disabled:opacity-50 font-semibold text-lg transition"
-          >
-            {loading ? "Please wait..." : isLogin ? "Login" : "Create Account"}
+          <button type="submit" disabled={loading} style={{ padding: '0.9rem', background: 'linear-gradient(135deg,#a78bfa,#7c3aed)', color: 'white', border: 'none', borderRadius: '12px', fontWeight: 700, fontSize: '1rem', cursor: loading ? 'not-allowed' : 'pointer', opacity: loading ? 0.7 : 1, fontFamily: 'Inter,sans-serif', marginTop: '0.5rem' }}>
+            {loading ? 'Please wait...' : isLogin ? 'Login →' : 'Create Account →'}
           </button>
         </form>
 
-        <div className="mt-6 text-center">
-          <button
-            onClick={() => setIsLogin(!isLogin)}
-            className="text-purple-200 hover:text-white transition"
-          >
-            {isLogin
-              ? "Don't have an account? Register"
-              : "Already have an account? Login"}
+        <div style={{ textAlign: 'center', marginTop: '1.5rem' }}>
+          <button onClick={() => setIsLogin(!isLogin)} style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.6)', cursor: 'pointer', fontSize: '0.9rem', fontFamily: 'Inter,sans-serif' }}>
+            {isLogin ? "Don't have an account? " : 'Already have an account? '}
+            <span style={{ color: '#a78bfa', fontWeight: 600 }}>{isLogin ? 'Register' : 'Login'}</span>
           </button>
         </div>
 
         {isLogin && (
-          <div className="mt-6 p-4 bg-white/5 rounded-xl text-sm border border-white/10"></div>
+          <div style={{ marginTop: '1.5rem', padding: '1rem', background: 'rgba(255,255,255,0.04)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.08)', fontSize: '0.8rem', color: 'rgba(255,255,255,0.5)' }}>
+            <p style={{ fontWeight: 600, color: 'rgba(255,255,255,0.7)', marginBottom: '0.5rem' }}>Demo Accounts:</p>
+            <p>sanitation@civic.gov / admin123</p>
+            <p>pwd@civic.gov / admin123</p>
+            <p>police@civic.gov / admin123</p>
+          </div>
         )}
 
-        <div className="mt-6 text-center">
-          <button
-            onClick={() => navigate("/")}
-            className="text-purple-300 hover:text-white transition text-sm"
-          >
+        <div style={{ textAlign: 'center', marginTop: '1.25rem' }}>
+          <button onClick={() => navigate('/')} style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.4)', cursor: 'pointer', fontSize: '0.85rem', fontFamily: 'Inter,sans-serif' }}>
             ← Back to Home
           </button>
         </div>
