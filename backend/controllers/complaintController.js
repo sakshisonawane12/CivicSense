@@ -1,4 +1,12 @@
-const { classifyComplaint, analyzeSentiment, translateText, detectDuplicates } = require('../services/aiService');
+const {
+  classifyComplaint,
+  analyzeSentiment,
+  translateText,
+  detectDuplicates,
+  computeTruthScore,
+  recommendAction,
+  generateRiskForecasts,
+} = require('../services/aiService');
 const { awardComplaintPoints, awardResolutionPoints } = require('./rewardsController');
 const Complaint = require('../models/Complaint');
 const Hotspot = require('../models/Hotspot');
@@ -13,6 +21,8 @@ exports.createComplaint = async (req, res) => {
   try {
     const { citizen_name, citizen_phone, complaint_text, location, language = 'en' } = req.body;
     const userId = req.user?.id || null;
+    const imageFile = req.files?.image?.[0];
+    const audioFile = req.files?.audio?.[0];
     let translatedText = complaint_text;
     if (language !== 'en') {
       translatedText = await translateText(complaint_text, 'en');
@@ -20,6 +30,24 @@ exports.createComplaint = async (req, res) => {
     const category = await classifyComplaint(translatedText);
     const sentiment = await analyzeSentiment(translatedText);
     const department = DEPARTMENT_MAP[category] || 'Public Works Department';
+
+    // TruthScore (authenticity) based on evidence and patterns
+    const truth = await computeTruthScore({
+      text: translatedText,
+      citizen_phone,
+      hasMedia: !!(imageFile || audioFile),
+      location,
+    });
+
+    // Outcome Optimizer: recommended department / priority / SLA
+    const recommendation = await recommendAction({
+      category,
+      sentimentPriority: sentiment.priority,
+      location,
+      text: translatedText,
+      hasMedia: !!(imageFile || audioFile),
+    });
+
     const complaint = await Complaint.create({
       citizen_name,
       citizen_phone,
@@ -28,10 +56,43 @@ exports.createComplaint = async (req, res) => {
       category,
       status: 'Pending',
       user_id: userId,
+      image_url: imageFile ? imageFile.path : undefined,
+      audio_url: audioFile ? audioFile.path : undefined,
+      truth_score: truth.truth_score,
+      evidence_flags: truth.evidence_flags,
+      is_suspected_spam: truth.is_suspected_spam,
+      recommended_department: recommendation.recommended_department,
+      recommended_priority: recommendation.recommended_priority,
+      recommended_sla_hours: recommendation.recommended_sla_hours,
+      recommendation_reason: recommendation.recommendation_reason,
     });
     await updateHotspots(location, category);
     await awardComplaintPoints(userId);
-    res.status(201).json({ success: true, complaint });
+    res.status(201).json({
+      success: true,
+      complaint,
+      ai_meta: {
+        truth_score: truth.truth_score,
+        evidence_flags: truth.evidence_flags,
+        is_suspected_spam: truth.is_suspected_spam,
+        recommended_department: recommendation.recommended_department,
+        recommended_priority: recommendation.recommended_priority,
+        recommended_sla_hours: recommendation.recommended_sla_hours,
+      },
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+
+// Digital Twin / Early Warning – near-term risk forecasts per location
+exports.getFutureHotspots = async (req, res) => {
+  try {
+    const horizon = req.query.horizon_hours
+      ? parseInt(req.query.horizon_hours, 10)
+      : 24;
+    const forecasts = await generateRiskForecasts({ horizon_hours: horizon });
+    res.json({ success: true, forecasts });
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });
   }

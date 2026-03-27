@@ -9,7 +9,8 @@ const {
   getHotspots,
   getDashboardStats,
   trackComplaint,
-  getUserComplaints
+  getUserComplaints,
+  getFutureHotspots,
 } = require('../controllers/complaintController');
 const { verifyToken } = require('../controllers/authController');
 
@@ -45,5 +46,6 @@ router.get('/my-complaints', verifyToken, getUserComplaints);
 router.patch('/:id/status', updateComplaintStatus);
 router.get('/hotspots', getHotspots);
 router.get('/stats', getDashboardStats);
+router.get('/future-hotspots', getFutureHotspots);
 
 module.exports = router;

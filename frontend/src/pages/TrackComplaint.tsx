@@ -35,6 +35,18 @@ export default function TrackComplaint() {
   };
 
   const priorityColor = (p: string) => p === 'High' ? '#dc2626' : p === 'Medium' ? '#d97706' : '#059669';
+  const truthBadge = (score: number | undefined, suspected: boolean | undefined) => {
+    const pct = Math.round(((score ?? 0.5) * 100));
+    const isBad = suspected || pct < 35;
+    return {
+      label: `${pct}%`,
+      style: {
+        background: isBad ? 'var(--coral-light)' : 'var(--teal-light)',
+        color: isBad ? 'var(--coral)' : 'var(--teal)',
+        border: `1px solid ${isBad ? 'rgba(232, 71, 42, 0.2)' : 'rgba(13, 148, 136, 0.2)'}`,
+      } as React.CSSProperties
+    };
+  };
 
   return (
     <div className="cs-main" style={{ paddingBottom: '5rem' }}>
@@ -120,6 +132,54 @@ export default function TrackComplaint() {
                       <Activity size={16} /> Source Context
                     </p>
                     <p style={{ margin: 0, lineHeight: 1.6, fontSize: '1rem', color: 'var(--ink2)', fontWeight: 500 }}>{c.complaint_text}</p>
+                  </div>
+
+                  <div style={{ background: '#ffffff', border: '1px solid var(--border)', borderRadius: '16px', padding: '1.25rem', marginBottom: '1.5rem' }}>
+                    <p style={{ fontSize: '0.85rem', margin: '0 0 0.75rem', textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--teal)', display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 800 }}>
+                      AI Insights
+                    </p>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: '0.75rem' }}>
+                      {(() => {
+                        const t = truthBadge(c.truth_score, c.is_suspected_spam);
+                        return (
+                          <>
+                            <div style={{ background: 'var(--cream)', padding: '1rem', borderRadius: '14px', border: '1px solid var(--border)' }}>
+                              <p style={{ fontSize: '0.72rem', color: 'var(--ink3)', margin: '0 0 0.45rem', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 700 }}>TruthScore</p>
+                              <span style={{ ...t.style, display: 'inline-block', padding: '0.35rem 0.7rem', borderRadius: '999px', fontWeight: 900, fontFamily: 'monospace' }}>
+                                {t.label}
+                              </span>
+                            </div>
+                            <div style={{ background: 'var(--cream)', padding: '1rem', borderRadius: '14px', border: '1px solid var(--border)' }}>
+                              <p style={{ fontSize: '0.72rem', color: 'var(--ink3)', margin: '0 0 0.45rem', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 700 }}>Rec. Priority</p>
+                              <p style={{ margin: 0, fontWeight: 900, color: c.recommended_priority === 'High' ? 'var(--coral)' : c.recommended_priority === 'Low' ? 'var(--teal)' : 'var(--ink)', fontFamily: 'monospace' }}>
+                                {c.recommended_priority ?? '—'}
+                              </p>
+                            </div>
+                            <div style={{ background: 'var(--cream)', padding: '1rem', borderRadius: '14px', border: '1px solid var(--border)' }}>
+                              <p style={{ fontSize: '0.72rem', color: 'var(--ink3)', margin: '0 0 0.45rem', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 700 }}>Rec. SLA</p>
+                              <p style={{ margin: 0, fontWeight: 900, color: 'var(--ink)', fontFamily: 'monospace' }}>
+                                {c.recommended_sla_hours ?? '—'}h
+                              </p>
+                            </div>
+                            <div style={{ background: 'var(--cream)', padding: '1rem', borderRadius: '14px', border: '1px solid var(--border)' }}>
+                              <p style={{ fontSize: '0.72rem', color: 'var(--ink3)', margin: '0 0 0.45rem', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 700 }}>Rec. Dept</p>
+                              <p style={{ margin: 0, fontWeight: 900, color: 'var(--ink)', fontSize: '0.9rem' }}>
+                                {c.recommended_department ?? '—'}
+                              </p>
+                            </div>
+                          </>
+                        );
+                      })()}
+                    </div>
+                    {!!c.evidence_flags?.length && (
+                      <div style={{ marginTop: '0.9rem', display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
+                        {c.evidence_flags.slice(0, 6).map((f: string) => (
+                          <span key={f} style={{ background: 'var(--cream2)', border: '1px solid var(--border)', padding: '0.25rem 0.55rem', borderRadius: '999px', fontSize: '0.75rem', color: 'var(--ink2)', fontWeight: 700, fontFamily: 'monospace' }}>
+                            {f}
+                          </span>
+                        ))}
+                      </div>
+                    )}
                   </div>
 
                   <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', color: 'var(--ink3)', fontFamily: 'monospace', fontWeight: 600 }}>

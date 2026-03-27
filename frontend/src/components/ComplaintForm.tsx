@@ -10,6 +10,7 @@ export default function ComplaintForm() {
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [complaintId, setComplaintId] = useState<any>(null);
+  const [aiMeta, setAiMeta] = useState<any>(null);
   const [recording, setRecording] = useState(false);
 
   const handleSubmit = async (e: any) => {
@@ -22,9 +23,10 @@ export default function ComplaintForm() {
     try {
       const response = await complaintService.createComplaint(data);
       setComplaintId(response.complaint?._id);
+      setAiMeta(response.ai_meta || null);
       setSuccess(true);
       setTimeout(() => {
-        setSuccess(false); setComplaintId(null);
+        setSuccess(false); setComplaintId(null); setAiMeta(null);
         setFormData({ citizen_name: '', citizen_phone: '', complaint_text: '', location: '', language: 'en' });
         setImage(null); setAudio(null);
       }, 5000);
@@ -59,6 +61,34 @@ export default function ComplaintForm() {
             <p style={{ color: 'var(--ink3)', margin: 0, fontSize: '0.875rem', fontFamily: 'var(--sans)' }}>Save this ID to track your complaint</p>
           </div>
           <p style={{ color: 'var(--ink2)', fontSize: '0.95rem', fontFamily: 'var(--sans)' }}>Your complaint has been registered and will be processed soon.</p>
+
+          {aiMeta && (
+            <div style={{ marginTop: '1.5rem', textAlign: 'left', background: 'var(--cream2)', border: '1px solid var(--border)', borderRadius: '14px', padding: '1.25rem' }}>
+              <p style={{ margin: 0, fontSize: '0.8rem', fontWeight: 800, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--indigo)', fontFamily: 'var(--sans)' }}>
+                AI Insights
+              </p>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem', marginTop: '0.9rem' }}>
+                <div>
+                  <div style={{ fontSize: '0.75rem', color: 'var(--ink3)', fontWeight: 700 }}>TruthScore</div>
+                  <div style={{ fontSize: '1.1rem', fontWeight: 900, color: aiMeta.is_suspected_spam ? 'var(--coral)' : 'var(--teal)' }}>
+                    {Math.round((aiMeta.truth_score ?? 0.5) * 100)}%
+                  </div>
+                </div>
+                <div>
+                  <div style={{ fontSize: '0.75rem', color: 'var(--ink3)', fontWeight: 700 }}>Recommended SLA</div>
+                  <div style={{ fontSize: '1.1rem', fontWeight: 900, color: 'var(--ink)' }}>
+                    {aiMeta.recommended_sla_hours ?? '—'} hrs
+                  </div>
+                </div>
+                <div style={{ gridColumn: '1 / -1' }}>
+                  <div style={{ fontSize: '0.75rem', color: 'var(--ink3)', fontWeight: 700 }}>Recommended Department</div>
+                  <div style={{ fontSize: '0.95rem', fontWeight: 800, color: 'var(--ink)' }}>
+                    {aiMeta.recommended_department ?? '—'}
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     );

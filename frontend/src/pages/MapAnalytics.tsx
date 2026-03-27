@@ -34,12 +34,13 @@ const CATEGORY_COLORS: Record<string, string> = {
   Safety: '#ef4444',
 };
 
-// Mock future predictions for "Predict Future" mode
-const FUTURE_PREDICTIONS = [
-  { area: 'Shivaji Nagar', risk: 78, type: 'Waste Overflow', reason: 'High foot traffic + 2 missed pickups', coords: [18.5308, 73.8474] },
-  { area: 'Hadapsar', risk: 92, type: 'Waterlogging Risk', reason: 'Heavy rain forecast + blocked main drain', coords: [18.5089, 73.9260] },
-  { area: 'FC Road', risk: 65, type: 'Pothole Expansion', reason: 'Heavy traffic + existing minor road damage', coords: [18.5236, 73.8478] },
-];
+type FuturePrediction = {
+  area: string;
+  risk: number;
+  type: string;
+  reason: string;
+  coords: [number, number];
+};
 
 export default function MapAnalytics() {
   const [complaints, setComplaints] = useState<any[]>([]);
@@ -49,12 +50,51 @@ export default function MapAnalytics() {
 
   // Predict Future State
   const [simulateFuture, setSimulateFuture] = useState(false);
+  const [futurePredictions, setFuturePredictions] = useState<FuturePrediction[]>([]);
 
   const puneCenter: [number, number] = [18.5204, 73.8567];
 
   useEffect(() => {
     axios.get(API_URL).then(r => setComplaints(r.data.complaints || []));
     axios.get(`${API_URL}/stats`).then(r => setStats(r.data.stats || {}));
+
+    // Load real AI predictions for future hotspots
+    axios
+      .get(`${API_URL}/future-hotspots`)
+      .then(r => {
+        const forecasts = (r.data?.forecasts || []) as Array<{
+          location: string;
+          category: string;
+          risk_score: number;
+        }>;
+
+        const mapped: FuturePrediction[] = forecasts
+          .map(f => {
+            const coords = getCoords(f.location);
+            if (!coords) return null;
+            const riskPercent = Math.round(f.risk_score * 100);
+            const type =
+              f.category === 'Sanitation'
+                ? 'Waste Overflow'
+                : f.category === 'Infrastructure'
+                ? 'Pothole / Infrastructure Stress'
+                : 'Safety Risk';
+            const reason = `Recent ${f.category.toLowerCase()} spike around ${f.location}`;
+            return {
+              area: f.location,
+              risk: riskPercent,
+              type,
+              reason,
+              coords,
+            };
+          })
+          .filter(Boolean) as FuturePrediction[];
+
+        setFuturePredictions(mapped);
+      })
+      .catch(() => {
+        // fail silently – future mode will just have no points
+      });
   }, []);
 
   const getCoords = (location: string): [number, number] | null => {
@@ -79,10 +119,12 @@ export default function MapAnalytics() {
     })
     .filter(Boolean) as [number, number, number][];
 
-  // Future simulated heatmap points
-  const futureHeatmapPoints: [number, number, number][] = FUTURE_PREDICTIONS.map(p =>
-    [p.coords[0], p.coords[1], p.risk / 100 * 1.5]
-  );
+  // Future simulated heatmap points (AI-backed)
+  const futureHeatmapPoints: [number, number, number][] = futurePredictions.map(p => [
+    p.coords[0],
+    p.coords[1],
+    (p.risk / 100) * 1.5,
+  ]);
 
   const heatmapPointsToRender = simulateFuture ? futureHeatmapPoints : realHeatmapPoints;
 
@@ -140,7 +182,7 @@ export default function MapAnalytics() {
                   <h3 className="cs-panel-title" style={{ margin: 0, color: 'var(--indigo)' }}>AI Predictions (+2 HRS)</h3>
                 </div>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                  {FUTURE_PREDICTIONS.map((p, i) => (
+                  {futurePredictions.map((p, i) => (
                     <div key={i} style={{ background: '#ffffff', padding: '1rem', borderRadius: '12px', border: '1px solid #e2e8f0', boxShadow: '0 1px 2px rgba(0,0,0,0.05)' }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
                         <span style={{ fontWeight: 700, color: p.risk > 80 ? '#b91c1c' : '#b45309' }}>{p.type}</span>
@@ -230,7 +272,7 @@ export default function MapAnalytics() {
               )}
 
               {/* Simulated Markers */}
-              {simulateFuture && FUTURE_PREDICTIONS.map(p => (
+              {simulateFuture && futurePredictions.map(p => (
                 <Marker key={p.area} position={p.coords as [number, number]}>
                   <Popup>
                     <div style={{ minWidth: '200px', fontFamily: 'Inter' }}>
