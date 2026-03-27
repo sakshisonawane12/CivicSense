@@ -26,7 +26,7 @@ CivicSense is an AI-powered civic complaint management platform that automatical
 |-------|-----------|
 | Frontend | React 19, TypeScript, Vite |
 | Backend | Node.js, Express |
-| Database | PostgreSQL |
+| Database | MongoDb |
 | AI | Google Gemini API |
 | Maps | Leaflet.js + OpenStreetMap |
 | Auth | JWT + bcrypt |
