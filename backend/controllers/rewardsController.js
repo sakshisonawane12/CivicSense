@@ -1,4 +1,5 @@
-const pool = require('../config/db');
+const User = require('../models/User');
+const Complaint = require('../models/Complaint');
 
 const BADGES = {
   FIRST_REPORT: { id: 'first_report', name: 'First Reporter', emoji: '🌟', description: 'Submitted your first complaint', points: 10 },
@@ -11,24 +12,14 @@ const BADGES = {
   INFRASTRUCTURE_WATCH: { id: 'infrastructure_watch', name: 'Infrastructure Watch', emoji: '🏗️', description: 'Reported an Infrastructure issue', points: 15 },
 };
 
-async function checkAndAwardBadges(userId, pool) {
-  const result = await pool.query(
-    'SELECT points, badges, complaints_count, resolved_count FROM users WHERE id = $1',
-    [userId]
-  );
-  if (!result.rows.length) return;
-
-  const user = result.rows[0];
+async function checkAndAwardBadges(userId) {
+  const user = await User.findById(userId);
+  if (!user) return;
   const currentBadges = user.badges || [];
   const newBadges = [...currentBadges];
   let bonusPoints = 0;
-
-  const complaintsResult = await pool.query(
-    'SELECT category FROM complaints WHERE user_id = $1',
-    [userId]
-  );
-  const categories = complaintsResult.rows.map(r => r.category);
-
+  const complaints = await Complaint.find({ user_id: userId });
+  const categories = complaints.map(c => c.category);
   const badgeChecks = [
     { badge: BADGES.FIRST_REPORT, condition: user.complaints_count >= 1 },
     { badge: BADGES.ACTIVE_CITIZEN, condition: user.complaints_count >= 5 },
@@ -39,32 +30,23 @@ async function checkAndAwardBadges(userId, pool) {
     { badge: BADGES.ECO_WARRIOR, condition: categories.includes('Sanitation') },
     { badge: BADGES.INFRASTRUCTURE_WATCH, condition: categories.includes('Infrastructure') },
   ];
-
   for (const { badge, condition } of badgeChecks) {
     if (condition && !newBadges.includes(badge.id)) {
       newBadges.push(badge.id);
       bonusPoints += badge.points;
     }
   }
-
   if (newBadges.length !== currentBadges.length || bonusPoints > 0) {
-    await pool.query(
-      'UPDATE users SET badges = $1, points = points + $2 WHERE id = $3',
-      [newBadges, bonusPoints, userId]
-    );
+    await User.findByIdAndUpdate(userId, { badges: newBadges, $inc: { points: bonusPoints } });
   }
-
   return newBadges.filter(b => !currentBadges.includes(b));
 }
 
 exports.awardComplaintPoints = async (userId) => {
   if (!userId) return;
   try {
-    await pool.query(
-      'UPDATE users SET points = points + 10, complaints_count = complaints_count + 1 WHERE id = $1',
-      [userId]
-    );
-    await checkAndAwardBadges(userId, pool);
+    await User.findByIdAndUpdate(userId, { $inc: { points: 10, complaints_count: 1 } });
+    await checkAndAwardBadges(userId);
   } catch (error) {
     console.error('Award points error:', error);
   }
@@ -73,11 +55,8 @@ exports.awardComplaintPoints = async (userId) => {
 exports.awardResolutionPoints = async (userId) => {
   if (!userId) return;
   try {
-    await pool.query(
-      'UPDATE users SET points = points + 20, resolved_count = resolved_count + 1 WHERE id = $1',
-      [userId]
-    );
-    await checkAndAwardBadges(userId, pool);
+    await User.findByIdAndUpdate(userId, { $inc: { points: 20, resolved_count: 1 } });
+    await checkAndAwardBadges(userId);
   } catch (error) {
     console.error('Award resolution points error:', error);
   }
@@ -85,12 +64,10 @@ exports.awardResolutionPoints = async (userId) => {
 
 exports.getLeaderboard = async (req, res) => {
   try {
-    const result = await pool.query(
-      `SELECT id, name, points, badges, complaints_count, resolved_count 
-       FROM users WHERE role = 'citizen' 
-       ORDER BY points DESC LIMIT 10`
-    );
-    res.json({ success: true, leaderboard: result.rows });
+    const leaderboard = await User.find({ role: 'citizen' })
+      .sort({ points: -1, resolved_count: -1, complaints_count: -1 })
+      .limit(10);
+    res.json({ success: true, leaderboard });
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });
   }
@@ -98,21 +75,18 @@ exports.getLeaderboard = async (req, res) => {
 
 exports.getUserStats = async (req, res) => {
   try {
-    const result = await pool.query(
-      'SELECT id, name, points, badges, complaints_count, resolved_count FROM users WHERE id = $1',
-      [req.user.id]
-    );
-    const user = result.rows[0];
-
+    const user = await User.findById(req.user.id);
+    if (!user) {
+      return res.status(404).json({ success: false, error: 'User not found' });
+    }
     const badgeDetails = (user.badges || []).map(id =>
       Object.values(BADGES).find(b => b.id === id)
     ).filter(Boolean);
-
     const allBadges = Object.values(BADGES).map(b => ({
       ...b,
       earned: (user.badges || []).includes(b.id)
     }));
-
+    const rank = await getUserRank(user._id, user.points);
     res.json({
       success: true,
       stats: {
@@ -121,7 +95,7 @@ exports.getUserStats = async (req, res) => {
         resolved_count: user.resolved_count,
         badges: badgeDetails,
         allBadges,
-        rank: await getUserRank(user.id, user.points)
+        rank
       }
     });
   } catch (error) {
@@ -130,11 +104,8 @@ exports.getUserStats = async (req, res) => {
 };
 
 async function getUserRank(userId, points) {
-  const result = await pool.query(
-    "SELECT COUNT(*) as rank FROM users WHERE role = 'citizen' AND points > $1",
-    [points]
-  );
-  return parseInt(result.rows[0].rank) + 1;
+  const rank = await User.countDocuments({ role: 'citizen', points: { $gt: points } });
+  return rank + 1;
 }
 
 exports.BADGES = BADGES;

@@ -1,20 +1,12 @@
 const { GoogleGenerativeAI } = require("@google/generative-ai");
+const Complaint = require('../models/Complaint');
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 const model = genAI.getGenerativeModel({ model: "gemini-pro" });
 
 const URGENCY_KEYWORDS = [
-  "accident",
-  "fire",
-  "blocked",
-  "emergency",
-  "urgent",
-  "danger",
-  "critical",
-  "immediate",
-  "help",
-  "death",
-  "injury",
+  "accident", "fire", "blocked", "emergency", "urgent",
+  "danger", "critical", "immediate", "help", "death", "injury",
 ];
 
 async function classifyComplaint(text) {
@@ -36,24 +28,16 @@ async function classifyComplaint(text) {
 
 async function analyzeSentiment(text) {
   try {
-    const prompt = `Analyze this complaint for sentiment and urgency. Respond with JSON only:\n{"sentiment": <number between -1 and 1>, "priority": "<High/Medium/Low>", "urgency_words": ["word1", "word2"]}\n\nComplaint: ${text}`;
-    const result = await model.generateContent(prompt);
-    const response = await result.response;
-    const responseText = response.text().trim();
-    const jsonMatch = responseText.match(/\{[\s\S]*\}/);
-    if (jsonMatch) {
-      return JSON.parse(jsonMatch[0]);
-    }
-    throw new Error("Invalid response");
-  } catch (error) {
-    console.error("Sentiment analysis error:", error);
     const lowerText = text.toLowerCase();
     const foundUrgent = URGENCY_KEYWORDS.filter((kw) => lowerText.includes(kw));
     return {
-      sentiment: 0,
+      sentiment: foundUrgent.length > 0 ? -1 : 0,
       priority: foundUrgent.length > 0 ? "High" : "Medium",
       urgency_words: foundUrgent,
     };
+  } catch (error) {
+    console.error("Sentiment analysis error:", error);
+    return { sentiment: 0, priority: "Medium", urgency_words: [] };
   }
 }
 
@@ -70,28 +54,19 @@ async function translateText(text, targetLang = "en") {
   }
 }
 
-async function detectDuplicates(pool, newComplaint) {
+async function detectDuplicates(newComplaint) {
   try {
-    const result = await pool.query(
-      `SELECT id, complaint_text, location FROM complaints 
-       WHERE category = $1 AND location = $2 AND status != 'resolved' 
-       AND created_at > NOW() - INTERVAL '7 days'`,
-      [newComplaint.category, newComplaint.location],
-    );
-
-    for (let existing of result.rows) {
-      const similarity = calculateSimilarity(
-        newComplaint.complaint_text,
-        existing.complaint_text,
-      );
-      if (similarity > 0.7) {
-        return existing.id;
-      }
-    }
+    const result = await Complaint.find({
+      location: newComplaint.location,
+      category: newComplaint.category,
+      status: { $ne: 'Resolved' },
+      createdAt: { $gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) }
+    });
+    return result;
   } catch (error) {
     console.error("Duplicate detection error:", error);
+    return null;
   }
-  return null;
 }
 
 function calculateSimilarity(str1, str2) {

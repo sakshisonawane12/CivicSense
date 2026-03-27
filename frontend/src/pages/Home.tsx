@@ -2,217 +2,219 @@ import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
 import axios from "axios";
 
+/* ─── types ─── */
+interface Stats {
+  total?: number;
+  high_priority?: number;
+  pending?: number;
+  resolved?: number;
+}
+
+;
+
+/* ─── city SVG for map preview ─── */
+const CityGrid = () => (
+  <svg style={{ position: "absolute", inset: 0, opacity: 0.15 }} viewBox="0 0 400 130" preserveAspectRatio="xMidYMid slice">
+    {Array.from({ length: 13 }).map((_, c) =>
+      Array.from({ length: 4 }).map((_, r) => (
+        <rect key={`${c}-${r}`} x={c * 31 + 3} y={r * 30 + 5} width={24} height={22} rx={2}
+          fill="#3730A3" opacity={(Math.sin(c * r + 1) + 1) * 0.4 + 0.1} />
+      ))
+    )}
+    {[
+      { cx: 80, cy: 65, r: 9, c: "#E8472A" },
+      { cx: 195, cy: 45, r: 7, c: "#E8472A" },
+      { cx: 310, cy: 85, r: 6, c: "#D97706" },
+      { cx: 135, cy: 105, r: 8, c: "#E8472A" },
+      { cx: 255, cy: 28, r: 5, c: "#0D9488" },
+      { cx: 360, cy: 60, r: 6, c: "#0D9488" },
+    ].map((p, i) => (
+      <circle key={i} cx={p.cx} cy={p.cy} r={p.r} fill={p.c} opacity={0.85} />
+    ))}
+  </svg>
+);
+
+/* ─── data ─── */
+const FEED = [
+  { dot: "#E8472A", title: "Pothole — FC Road, Shivajinagar", meta: "Infrastructure · High priority · 3 min ago", badge: "Urgent", bg: "#FEF0EC", fg: "#9A1E0D" },
+  { dot: "#0D9488", title: "Streetlight fixed — Baner Road", meta: "Infrastructure · Resolved in 2h", badge: "Resolved", bg: "#F0FDFA", fg: "#0D6B62" },
+  { dot: "#D97706", title: "Overflowing bin — Kothrud", meta: "Sanitation · Assigned · 18 min ago", badge: "Pending", bg: "#FFFBEB", fg: "#7C4D00" },
+  { dot: "#3730A3", title: "Duplicate merged — Water leak #2847", meta: "Smart dedup · 31 min ago", badge: "Merged", bg: "#EEF2FF", fg: "#2D2589" },
+  { dot: "#0D9488", title: "Pothole cluster resolved — Aundh", meta: "Infrastructure · Resolved in 6h", badge: "Resolved", bg: "#F0FDFA", fg: "#0D6B62" },
+  { dot: "#D97706", title: "Damaged footpath — Camp", meta: "Infrastructure · Pending · 1h ago", badge: "Pending", bg: "#FFFBEB", fg: "#7C4D00" },
+];
+
+const FEATURES = [
+  { emoji: "🤖", name: "AI classification", desc: "Our AI reads your complaint and instantly routes it to the right department.", bg: "#EEF2FF" },
+  { emoji: "📍", name: "Live city map", desc: "Real-time heatmap of complaint hotspots across every Pune ward.", bg: "#F0FDFA" },
+  { emoji: "🔍", name: "Duplicate detection", desc: "70% similarity threshold groups related issues — no spam, no double-work.", bg: "#F0FDF4" },
+  { emoji: "🌐", name: "Hindi · Marathi · English", desc: "File in any language. AI translates before processing — zero language barrier.", bg: "#FFFBEB" },
+  { emoji: "🎙️", name: "Voice & photo", desc: "Record audio or attach a photo. No typing required on mobile.", bg: "#FEF0EC" },
+  { emoji: "🏆", name: "Rewards & leaderboard", desc: "Earn points every time you report. Climb the city-wide civic leaderboard.", bg: "#F5F3FF" },
+];
+
+/* ─── component ─── */
 export default function Home() {
-  const [stats, setStats] = useState<any>({});
+  const [stats, setStats] = useState<Stats>({});
+  const [activeTab, setActiveTab] = useState(0);
   const user = JSON.parse(localStorage.getItem("user") || "null");
 
   useEffect(() => {
     axios.get("http://localhost:5000/api/complaints/stats")
       .then(r => setStats(r.data.stats || {}))
-      .catch(() => {});
+      .catch(() => { });
   }, []);
 
-  const features = [
-    { emoji: "🤖", title: "AI Classification", desc: "Gemini AI auto-classifies complaints into Sanitation, Infrastructure & Safety", color: "#667eea" },
-    { emoji: "📍", title: "Map Analytics", desc: "Real-time heatmap showing complaint hotspots across Pune city", color: "#f59e0b" },
-    { emoji: "🔍", title: "Duplicate Detection", desc: "Smart 70% similarity algorithm prevents spam and groups related issues", color: "#10b981" },
-    { emoji: "🌐", title: "Multi-lingual", desc: "Submit complaints in English, Hindi or Marathi with AI translation", color: "#ef4444" },
-    { emoji: "🎙️", title: "Voice & Image", desc: "Record audio complaints or upload photos as evidence", color: "#8b5cf6" },
-    { emoji: "🏆", title: "Reward System", desc: "Earn points and badges for civic contributions and climb the leaderboard", color: "#ec4899" },
-  ];
+  const STAT_COLORS = ["#3730A3", "#E8472A", "#D97706", "#0D9488"];
 
   return (
-    <div style={{ color: "white", maxWidth: "1200px", margin: "0 auto" }}>
+    <div>
+      {/* ── NAV OVERRIDE (Already handled in App.tsx) ── */}
 
-      {/* Hero Section */}
-      <div style={{ textAlign: "center", padding: "4rem 2rem 3rem" }}>
-        <div style={{
-          display: "inline-block",
-          background: "rgba(255,255,255,0.1)",
-          backdropFilter: "blur(10px)",
-          border: "1px solid rgba(255,255,255,0.2)",
-          borderRadius: "50px",
-          padding: "0.5rem 1.5rem",
-          marginBottom: "1.5rem",
-          fontSize: "0.9rem"
-        }}>
-          🚀 AI-Powered Civic Platform for Pune
-        </div>
-
-        <h1 style={{
-          fontSize: "clamp(3rem, 8vw, 6rem)",
-          fontWeight: "900",
-          margin: "0 0 1rem",
-          background: "linear-gradient(135deg, #ffffff 0%, #a78bfa 50%, #60a5fa 100%)",
-          WebkitBackgroundClip: "text",
-          WebkitTextFillColor: "transparent",
-          backgroundClip: "text",
-          letterSpacing: "-2px",
-          lineHeight: 1.1,
-          fontFamily: "'Segoe UI', system-ui, sans-serif"
-        }}>
-          CivicSense
-        </h1>
-
-        <p style={{
-          fontSize: "clamp(1.1rem, 3vw, 1.5rem)",
-          opacity: 0.9,
-          marginBottom: "0.75rem",
-          fontWeight: "300",
-          letterSpacing: "0.5px"
-        }}>
-          AI-Driven Issue Redressal & Prioritization
-        </p>
-
-        <p style={{ fontSize: "1rem", opacity: 0.6, marginBottom: "2.5rem", maxWidth: "600px", margin: "0 auto 2.5rem" }}>
-          Report civic issues instantly with voice, text, or images. Our AI automatically classifies, prioritizes and routes your complaint to the right department.
-        </p>
-
-        <div style={{ display: "flex", gap: "1rem", justifyContent: "center", flexWrap: "wrap" }}>
-          {user?.role === "citizen" && (
-            <Link to="/submit" style={{
-              padding: "1rem 2.5rem",
-              background: "linear-gradient(135deg, #667eea, #764ba2)",
-              color: "white",
-              borderRadius: "50px",
-              textDecoration: "none",
-              fontWeight: "bold",
-              fontSize: "1.1rem",
-              boxShadow: "0 8px 32px rgba(102,126,234,0.4)",
-              transition: "transform 0.2s",
-            }}>
-              📝 Submit Complaint
-            </Link>
-          )}
-          <Link to="/dashboard" style={{
-            padding: "1rem 2.5rem",
-            background: "rgba(255,255,255,0.15)",
-            backdropFilter: "blur(10px)",
-            color: "white",
-            borderRadius: "50px",
-            textDecoration: "none",
-            fontWeight: "bold",
-            fontSize: "1.1rem",
-            border: "1px solid rgba(255,255,255,0.3)",
-          }}>
-            📊 View Dashboard
-          </Link>
-          <Link to="/map" style={{
-            padding: "1rem 2.5rem",
-            background: "rgba(255,255,255,0.15)",
-            backdropFilter: "blur(10px)",
-            color: "white",
-            borderRadius: "50px",
-            textDecoration: "none",
-            fontWeight: "bold",
-            fontSize: "1.1rem",
-            border: "1px solid rgba(255,255,255,0.3)",
-          }}>
-            🗺️ View Map
-          </Link>
-        </div>
-      </div>
-
-      {/* Live Stats */}
-      <div style={{
-        display: "grid",
-        gridTemplateColumns: "repeat(4, 1fr)",
-        gap: "1rem",
-        margin: "2rem 1rem",
-      }}>
-        {[
-          { label: "Total Complaints", value: stats.total || 0, emoji: "📋", color: "#667eea" },
-          { label: "High Priority", value: stats.high_priority || 0, emoji: "🚨", color: "#ef4444" },
-          { label: "Pending", value: stats.pending || 0, emoji: "⏳", color: "#f59e0b" },
-          { label: "Resolved", value: stats.resolved || 0, emoji: "✅", color: "#10b981" },
-        ].map((s, i) => (
-          <div key={i} style={{
-            background: "rgba(255,255,255,0.08)",
-            backdropFilter: "blur(10px)",
-            borderRadius: "16px",
-            padding: "1.5rem",
-            textAlign: "center",
-            border: `1px solid ${s.color}44`,
-            borderTop: `3px solid ${s.color}`,
-          }}>
-            <p style={{ fontSize: "2rem", margin: "0 0 0.25rem" }}>{s.emoji}</p>
-            <p style={{ fontSize: "2.5rem", fontWeight: "900", color: s.color, margin: "0" }}>{s.value}</p>
-            <p style={{ margin: "0.25rem 0 0", opacity: 0.7, fontSize: "0.85rem" }}>{s.label}</p>
+      {/* ── HERO ── */}
+      <section className="cs-hero">
+        {/* left */}
+        <div className="cs-hero-left">
+          <div className="cs-pill">
+            <span className="cs-pill-dot" />
+            AI-powered · Pune civic platform
           </div>
-        ))}
-      </div>
+          <h1 className="cs-h1">
+            Your city.<br />Your voice.<br /><em>Fixed faster.</em>
+          </h1>
+          <p className="cs-hero-sub">
+            Spot a pothole, broken light, or garbage pile? Report it in 10 seconds
+            using text, voice, or a photo — in Hindi, Marathi, or English.
+            The AI classifies and routes it instantly.
+          </p>
+          <div className="cs-cta-row">
+            {user?.role === "citizen" && (
+              <Link to="/submit" className="cs-btn-primary">📝 Submit complaint</Link>
+            )}
+            <Link to="/dashboard" className="cs-btn-secondary">📊 Dashboard</Link>
+            <Link to="/map" className="cs-btn-secondary">🗺️ Map</Link>
+          </div>
 
-      {/* Features Grid */}
-      <div style={{ padding: "2rem 1rem" }}>
-        <h2 style={{ textAlign: "center", fontSize: "2rem", marginBottom: "0.5rem", fontWeight: "800" }}>
-          ✨ Platform Features
-        </h2>
-        <p style={{ textAlign: "center", opacity: 0.6, marginBottom: "2rem" }}>
-          Everything you need for smart civic management
-        </p>
-
-        <div style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))",
-          gap: "1.25rem",
-        }}>
-          {features.map((f, i) => (
-            <div key={i} style={{
-              background: "rgba(255,255,255,0.07)",
-              backdropFilter: "blur(10px)",
-              borderRadius: "20px",
-              padding: "1.75rem",
-              border: "1px solid rgba(255,255,255,0.1)",
-              transition: "transform 0.2s, border-color 0.2s",
-              cursor: "default",
-              borderLeft: `4px solid ${f.color}`,
-            }}
-              onMouseEnter={e => (e.currentTarget.style.transform = "translateY(-4px)")}
-              onMouseLeave={e => (e.currentTarget.style.transform = "translateY(0)")}
-            >
-              <div style={{ fontSize: "2.5rem", marginBottom: "0.75rem" }}>{f.emoji}</div>
-              <h3 style={{ margin: "0 0 0.5rem", fontSize: "1.1rem", fontWeight: "700", color: f.color }}>{f.title}</h3>
-              <p style={{ margin: 0, opacity: 0.7, lineHeight: 1.6, fontSize: "0.9rem" }}>{f.desc}</p>
-            </div>
-          ))}
+          {/* stat strip */}
+          <div className="cs-stats-strip">
+            {[
+              { label: "Total", val: stats.total },
+              { label: "High priority", val: stats.high_priority },
+              { label: "Pending", val: stats.pending },
+              { label: "Resolved", val: stats.resolved },
+            ].map((s, i) => (
+              <div key={i} className="cs-stat">
+                <div className="cs-stat-label">{s.label}</div>
+                <div className="cs-stat-val" style={{ color: STAT_COLORS[i] }}>
+                  {s.val ?? "—"}
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
-      </div>
 
-      {/* How It Works */}
-      <div style={{ padding: "2rem 1rem 3rem" }}>
-        <h2 style={{ textAlign: "center", fontSize: "2rem", marginBottom: "0.5rem", fontWeight: "800" }}>
-          ⚡ How It Works
-        </h2>
-        <p style={{ textAlign: "center", opacity: 0.6, marginBottom: "2rem" }}>3 simple steps</p>
-
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "1.5rem" }}>
-          {[
-            { step: "01", title: "Submit", desc: "Report your civic issue with text, voice or image in any language", emoji: "📝", color: "#667eea" },
-            { step: "02", title: "AI Processes", desc: "Gemini AI classifies, prioritizes and routes to the right department", emoji: "🤖", color: "#a78bfa" },
-            { step: "03", title: "Track & Resolve", desc: "Track your complaint status and earn reward points when resolved", emoji: "✅", color: "#10b981" },
-          ].map((s, i) => (
-            <div key={i} style={{
-              background: "rgba(255,255,255,0.07)",
-              borderRadius: "20px",
-              padding: "2rem",
-              textAlign: "center",
-              border: "1px solid rgba(255,255,255,0.1)",
-              position: "relative",
-              overflow: "hidden",
-            }}>
-              <div style={{
-                position: "absolute", top: "1rem", right: "1rem",
-                fontSize: "4rem", fontWeight: "900", opacity: 0.05, color: s.color,
-                lineHeight: 1
-              }}>{s.step}</div>
-              <div style={{ fontSize: "3rem", marginBottom: "1rem" }}>{s.emoji}</div>
-              <h3 style={{ color: s.color, margin: "0 0 0.5rem", fontSize: "1.25rem", fontWeight: "700" }}>{s.title}</h3>
-              <p style={{ opacity: 0.7, margin: 0, lineHeight: 1.6, fontSize: "0.9rem" }}>{s.desc}</p>
-            </div>
-          ))}
+        {/* right panel */}
+        <div className="cs-hero-right">
+          <div className="cs-panel-header">
+            <span className="cs-panel-title">Live activity feed</span>
+            <span className="cs-live-badge">
+              <span className="cs-live-dot" /> Live
+            </span>
+          </div>
+          <div className="cs-cat-tabs">
+            {["All", "Infrastructure", "Sanitation", "Safety"].map((t, i) => (
+              <button key={t}
+                className={`cs-cat-tab${activeTab === i ? " active" : ""}`}
+                onClick={() => setActiveTab(i)}>
+                {t}
+              </button>
+            ))}
+          </div>
+          <div className="cs-feed">
+            {FEED.map((f, i) => (
+              <div key={i} className="cs-feed-item">
+                <div className="cs-feed-dot" style={{ background: f.dot }} />
+                <div className="cs-feed-body">
+                  <div className="cs-feed-title">{f.title}</div>
+                  <div className="cs-feed-meta">{f.meta}</div>
+                </div>
+                <span className="cs-feed-badge"
+                  style={{ background: f.bg, color: f.fg }}>
+                  {f.badge}
+                </span>
+              </div>
+            ))}
+          </div>
+          <div className="cs-map-prev">
+            <CityGrid />
+            <span className="cs-map-label">Pune heatmap</span>
+            <Link to="/map" className="cs-map-link">Open full map →</Link>
+          </div>
         </div>
+      </section>
+
+      {/* ── MAIN ── */}
+      <div className="cs-main">
+
+        {/* features */}
+        <section className="cs-section">
+          <div className="cs-eyebrow">Platform capabilities</div>
+          <div className="cs-section-title">Built for every citizen</div>
+          <div className="cs-section-sub">Simple enough for anyone. Powerful enough to run a city.</div>
+          <div className="cs-features-grid">
+            {FEATURES.map((f, i) => (
+              <div key={i} className="cs-feat">
+                <div className="cs-feat-icon" style={{ background: f.bg }}>{f.emoji}</div>
+                <div className="cs-feat-name">{f.name}</div>
+                <div className="cs-feat-desc">{f.desc}</div>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* how it works */}
+        <section className="cs-section">
+          <div className="cs-eyebrow">How it works</div>
+          <div className="cs-section-title">Three steps, zero friction</div>
+          <div className="cs-hiw">
+            {[
+              { n: "I", title: "You report the issue", desc: "Text, voice recording, or a photo. Works in Hindi, Marathi, or English from any device." },
+              { n: "II", title: "AI handles it instantly", desc: "Our AI model classifies, deduplicates, sets priority, and routes to the right municipal department." },
+              { n: "III", title: "Track & earn rewards", desc: "Watch your complaint status update live. Earn reward points the moment it's resolved." },
+            ].map((s, i) => (
+              <div key={i} className="cs-hiw-step">
+                <div className="cs-hiw-num">{s.n}</div>
+                <div className="cs-hiw-title">{s.title}</div>
+                <div className="cs-hiw-desc">{s.desc}</div>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* CTA band */}
+        <section style={{ padding: "0 0 5rem" }}>
+          <div className="cs-cta-band">
+            <div>
+              <div className="cs-cta-h">Make Pune work <em>better</em>.</div>
+              <div className="cs-cta-p">Every complaint filed is a step toward a cleaner, safer city.</div>
+            </div>
+            <div style={{ display: "flex", gap: 10, flexShrink: 0 }}>
+              {user?.role === "citizen" && (
+                <Link to="/submit" className="cs-btn-white">📝 Report now</Link>
+              )}
+              <Link to="/dashboard" className="cs-btn-ghost-white">View dashboard</Link>
+            </div>
+          </div>
+        </section>
       </div>
 
+      {/* footer */}
+      <div style={{ borderTop: "1px solid rgba(28,25,23,0.07)", padding: "1.25rem 2rem", display: "flex", alignItems: "center", justifyContent: "space-between", maxWidth: 1200, margin: "0 auto" }}>
+        <span style={{ fontFamily: "'Fraunces',Georgia,serif", fontWeight: 600, fontSize: "0.95rem", color: "#1C1917" }}>CivicSense</span>
+        <span style={{ fontSize: "0.75rem", color: "#78716C" }}>AI-powered civic platform · Pune Municipal Corporation</span>
+      </div>
+
+      {/* ── FLOATING DOCK (Already handled in App.tsx) ── */}
     </div>
   );
 }

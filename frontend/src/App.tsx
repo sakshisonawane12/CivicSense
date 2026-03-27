@@ -25,24 +25,27 @@ function App() {
     <Router>
       <div className="app">
         {user && (
-          <nav className="navbar">
-            <Link to="/home" className="logo">
-              🏛️ CivicSense
+          <nav className="cs-nav">
+            <Link to="/home" className="cs-brand">
+              <div className="cs-brand-icon">🏛️</div>
+              CivicSense
             </Link>
-            <div className="nav-links">
-              <Link to="/home">Home</Link>
+            <div className="cs-nav-links">
+              <Link to="/home" className="cs-nav-link">Home</Link>
+              <Link to="/dashboard" className="cs-nav-link">Dashboard</Link>
+              <Link to="/map" className="cs-nav-link">Live Map</Link>
+              <Link to="/leaderboard" className="cs-nav-link">Leaderboard</Link>
               {user.role === "citizen" && (
                 <>
-                  <Link to="/submit">Submit</Link>
-                  <Link to="/track">Track</Link>
-                  <Link to="/my-complaints">My Complaints</Link>
-                  <Link to="/leaderboard">🏆 Leaderboard</Link>
+                  <Link to="/track" className="cs-nav-link">Track Status</Link>
+                  <Link to="/my-complaints" className="cs-nav-link">My Logs</Link>
+                  <Link to="/profile" className="cs-nav-link">Profile</Link>
+                  <Link to="/submit" className="cs-nav-cta">📝 Report Issue</Link>
                 </>
               )}
-              <Link to="/dashboard">Dashboard</Link>
-              <Link to="/map">🗺️ Map</Link>
-              <Link to="/team">Team</Link>
-              <Link to="/profile">Profile</Link>
+              {user.role === "department" && (
+                <Link to="/profile" className="cs-nav-link">Profile</Link>
+              )}
             </div>
           </nav>
         )}
@@ -82,6 +85,17 @@ function App() {
             <Route path="/leaderboard" element={<Leaderboard />} />
           </Routes>
         </main>
+
+        {user && (
+          <div className="cs-dock">
+            <span className="cs-dock-label">System</span>
+            {user.role === "citizen" && (
+              <Link to="/submit" className="cs-dock-btn primary">📝 Report Issue</Link>
+            )}
+            <Link to="/dashboard" className="cs-dock-btn ghost">📊 Dashboard</Link>
+            <Link to="/map" className="cs-dock-btn ghost">🗺️ Map</Link>
+          </div>
+        )}
       </div>
     </Router>
   );

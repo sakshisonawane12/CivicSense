@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import axios from 'axios';
+import { Trophy, Activity, Hexagon, ShieldCheck } from 'lucide-react';
 
 const API_URL = 'http://localhost:5000/api/rewards';
 
@@ -16,12 +17,7 @@ export default function Leaderboard() {
       .finally(() => setLoading(false));
   }, []);
 
-  const getRankStyle = (index: number) => {
-    if (index === 0) return { background: 'linear-gradient(135deg, #ffd700, #ffb300)', color: '#333' };
-    if (index === 1) return { background: 'linear-gradient(135deg, #c0c0c0, #9e9e9e)', color: '#333' };
-    if (index === 2) return { background: 'linear-gradient(135deg, #cd7f32, #a0522d)', color: 'white' };
-    return { background: 'rgba(255,255,255,0.1)', color: 'white' };
-  };
+
 
   const getRankEmoji = (index: number) => {
     if (index === 0) return '🥇';
@@ -30,97 +26,105 @@ export default function Leaderboard() {
     return `#${index + 1}`;
   };
 
-  if (loading) return <div style={{ color: 'white', textAlign: 'center', padding: '4rem' }}>Loading...</div>;
+  if (loading) return (
+    <div style={{ minHeight: '60vh', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#c084fc', fontSize: '1.2rem', gap: '0.75rem', fontFamily: 'Outfit' }}>
+      <Activity className="animate-spin" /> Compiling Trust Scores...
+    </div>
+  );
 
   return (
-    <div style={{ maxWidth: '800px', margin: '0 auto', color: 'white' }}>
-      <h1 style={{ textAlign: 'center', fontSize: '2.5rem', marginBottom: '0.5rem' }}>🏆 Leaderboard</h1>
-      <p style={{ textAlign: 'center', color: 'rgba(255,255,255,0.7)', marginBottom: '2rem' }}>
-        Top civic contributors in Pune
-      </p>
-
-      {leaderboard.length === 0 ? (
-        <div style={{ textAlign: 'center', background: 'rgba(255,255,255,0.1)', borderRadius: '16px', padding: '3rem' }}>
-          <p style={{ fontSize: '3rem' }}>🏅</p>
-          <p>No citizens yet. Be the first to submit a complaint!</p>
+    <div className="cs-main" style={{ paddingBottom: '5rem' }}>
+      <section className="cs-section" style={{ maxWidth: '800px', margin: '0 auto', borderTop: 'none', paddingTop: '3rem' }}>
+        <div style={{ textAlign: 'center', marginBottom: '3rem' }}>
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.5rem' }}>
+            <Trophy size={36} color="var(--amber)" />
+            <h1 className="cs-h1" style={{ fontSize: '2.5rem', margin: 0 }}>
+              Citizen Trust Network
+            </h1>
+          </div>
+          <p style={{ color: 'var(--ink2)', margin: 0, fontSize: '1.1rem', fontFamily: 'var(--sans)' }}>Top contributors to the Self-Healing City</p>
         </div>
-      ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-          {leaderboard.map((citizen, index) => (
-            <div key={citizen.id} style={{
-              ...getRankStyle(index),
-              borderRadius: '16px',
-              padding: '1.25rem 1.5rem',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '1.5rem',
-              boxShadow: index < 3 ? '0 8px 32px rgba(0,0,0,0.3)' : 'none',
-              transform: index === 0 ? 'scale(1.02)' : 'scale(1)',
-            }}>
-              {/* Rank */}
-              <div style={{ fontSize: index < 3 ? '2rem' : '1.5rem', fontWeight: 'bold', minWidth: '50px', textAlign: 'center' }}>
-                {getRankEmoji(index)}
-              </div>
 
-              {/* Avatar */}
-              <div style={{
-                width: '50px', height: '50px', borderRadius: '50%',
-                background: 'rgba(255,255,255,0.2)',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                fontSize: '1.5rem', fontWeight: 'bold', flexShrink: 0
+        {leaderboard.length === 0 ? (
+          <div className="cs-card" style={{ textAlign: 'center', padding: '5rem 2rem' }}>
+            <Hexagon size={64} color="var(--amber)" style={{ margin: '0 auto 1.5rem', opacity: 0.3 }} />
+            <p style={{ fontSize: '1.2rem', fontWeight: 600, color: 'var(--ink)' }}>Data stream empty</p>
+            <p style={{ color: 'var(--ink3)', fontFamily: 'var(--sans)' }}>Initiate a scan report to establish the first trust baseline.</p>
+          </div>
+        ) : (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            {leaderboard.map((citizen, index) => (
+              <div key={citizen._id} className="cs-card" style={{
+                borderRadius: '20px', padding: '1.5rem 2rem', display: 'flex', alignItems: 'center', gap: '1.5rem',
+                border: index === 0 ? '2px solid var(--amber)' : '1px solid var(--border)',
+                background: index === 0 ? 'var(--cream)' : '#fff',
+                position: 'relative', overflow: 'hidden'
               }}>
-                {citizen.name?.charAt(0).toUpperCase()}
-              </div>
-
-              {/* Info */}
-              <div style={{ flex: 1 }}>
-                <p style={{ fontWeight: 'bold', fontSize: '1.1rem', margin: 0 }}>{citizen.name}</p>
-                <div style={{ display: 'flex', gap: '1rem', marginTop: '0.25rem', fontSize: '0.875rem', opacity: 0.8 }}>
-                  <span>📝 {citizen.complaints_count} complaints</span>
-                  <span>✅ {citizen.resolved_count} resolved</span>
+                {/* Rank */}
+                <div style={{ fontSize: index < 3 ? '2.5rem' : '1.5rem', fontWeight: 800, minWidth: '60px', textAlign: 'center', fontFamily: 'var(--serif)', color: 'var(--ink)' }}>
+                  {getRankEmoji(index)}
                 </div>
-                {/* Badges */}
-                {citizen.badges?.length > 0 && (
-                  <div style={{ display: 'flex', gap: '0.25rem', marginTop: '0.5rem', flexWrap: 'wrap' }}>
-                    {citizen.badges.slice(0, 4).map((badge: string) => (
-                      <span key={badge} style={{
-                        background: 'rgba(255,255,255,0.2)', borderRadius: '20px',
-                        padding: '2px 8px', fontSize: '0.75rem'
-                      }}>
-                        {getBadgeEmoji(badge)} {getBadgeName(badge)}
-                      </span>
-                    ))}
-                    {citizen.badges.length > 4 && (
-                      <span style={{ background: 'rgba(255,255,255,0.2)', borderRadius: '20px', padding: '2px 8px', fontSize: '0.75rem' }}>
-                        +{citizen.badges.length - 4} more
-                      </span>
-                    )}
+
+                {/* Avatar */}
+                <div style={{ width: '60px', height: '60px', borderRadius: '16px', background: 'var(--cream2)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.8rem', fontWeight: 800, flexShrink: 0, border: '1px solid var(--border)', fontFamily: 'var(--serif)', color: 'var(--ink)' }}>
+                  {citizen.name?.charAt(0).toUpperCase()}
+                </div>
+
+                {/* Info */}
+                <div style={{ flex: 1 }}>
+                  <p style={{ fontWeight: 800, fontSize: '1.25rem', margin: 0, fontFamily: 'var(--sans)', color: 'var(--ink)' }}>{citizen.name}</p>
+                  <div style={{ display: 'flex', gap: '1.5rem', marginTop: '0.4rem', fontSize: '0.85rem', color: 'var(--ink2)', fontWeight: 600 }}>
+                    <span style={{ display: 'flex', alignItems: 'center', gap: '0.3rem' }}><Activity size={14} /> {citizen.complaints_count} reports</span>
+                    <span style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', color: 'var(--teal)' }}><ShieldCheck size={14} /> {citizen.resolved_count} verified</span>
                   </div>
-                )}
-              </div>
+                  {/* Badges */}
+                  {citizen.badges?.length > 0 && (
+                    <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.75rem', flexWrap: 'wrap' }}>
+                      {citizen.badges.slice(0, 4).map((badge: string) => (
+                        <span key={badge} style={{ background: 'var(--white)', border: '1px solid var(--border2)', borderRadius: '6px', padding: '0.2rem 0.6rem', fontSize: '0.75rem', fontWeight: 600, letterSpacing: '0.02em', color: 'var(--ink2)' }}>
+                          {getBadgeEmoji(badge)} {getBadgeName(badge)}
+                        </span>
+                      ))}
+                      {citizen.badges.length > 4 && (
+                        <span style={{ background: 'var(--cream2)', borderRadius: '6px', padding: '0.2rem 0.6rem', fontSize: '0.75rem', fontWeight: 600, color: 'var(--ink3)' }}>
+                          +{citizen.badges.length - 4} logic trees
+                        </span>
+                      )}
+                    </div>
+                  )}
+                </div>
 
-              {/* Points */}
-              <div style={{ textAlign: 'center', flexShrink: 0 }}>
-                <p style={{ fontSize: '2rem', fontWeight: 'bold', margin: 0 }}>{citizen.points}</p>
-                <p style={{ fontSize: '0.75rem', opacity: 0.8, margin: 0 }}>points</p>
+                {/* Points */}
+                <div style={{ textAlign: 'right', flexShrink: 0, background: 'var(--cream2)', padding: '1rem', borderRadius: '16px', minWidth: '120px', border: '1px solid var(--border)' }}>
+                  <p style={{ fontSize: '2.5rem', fontWeight: 800, margin: 0, fontFamily: 'var(--sans)', lineHeight: 1, color: 'var(--ink)' }}>{citizen.points}</p>
+                  <p style={{ fontSize: '0.8rem', color: 'var(--ink3)', margin: '0.25rem 0 0', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 700 }}>Trust Score</p>
+                </div>
               </div>
+            ))}
+          </div>
+        )}
+
+        {/* Points Guide */}
+        <div className="cs-card" style={{ padding: '2rem', marginTop: '3rem' }}>
+          <h3 className="cs-panel-title" style={{ marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <ShieldCheck size={20} color="var(--teal)" /> Algorithm Calibration Guide
+          </h3>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', fontSize: '0.9rem', fontFamily: 'var(--sans)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', padding: '0.75rem', background: 'var(--cream)', borderRadius: '8px', border: '1px solid var(--border)' }}>
+              <span style={{ color: 'var(--ink2)', fontWeight: 600 }}>Initiate Report Matrix</span><span style={{ fontWeight: 800, color: 'var(--amber)' }}>+10 pts</span>
             </div>
-          ))}
+            <div style={{ display: 'flex', justifyContent: 'space-between', padding: '0.75rem', background: 'var(--cream)', borderRadius: '8px', border: '1px solid var(--border)' }}>
+              <span style={{ color: 'var(--ink2)', fontWeight: 600 }}>Anomaly Resolved</span><span style={{ fontWeight: 800, color: 'var(--amber)' }}>+20 pts</span>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', padding: '0.75rem', background: 'var(--cream)', borderRadius: '8px', border: '1px solid var(--border)' }}>
+              <span style={{ color: 'var(--ink2)', fontWeight: 600 }}>First Node Activation</span><span style={{ fontWeight: 800, color: 'var(--amber)' }}>+10 pts bonus</span>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', padding: '0.75rem', background: 'var(--cream)', borderRadius: '8px', border: '1px solid var(--border)' }}>
+              <span style={{ color: 'var(--ink2)', fontWeight: 600 }}>5 Nodes Logged</span><span style={{ fontWeight: 800, color: 'var(--amber)' }}>+25 pts bonus</span>
+            </div>
+          </div>
         </div>
-      )}
-
-      {/* Points Guide */}
-      <div style={{ background: 'rgba(255,255,255,0.1)', borderRadius: '16px', padding: '1.5rem', marginTop: '2rem' }}>
-        <h3 style={{ marginBottom: '1rem' }}>💡 How to Earn Points</h3>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem', fontSize: '0.9rem' }}>
-          <span>📝 Submit complaint → +10 pts</span>
-          <span>✅ Complaint resolved → +20 pts</span>
-          <span>🌟 First complaint → +10 pts bonus</span>
-          <span>🏅 5 complaints → +25 pts bonus</span>
-          <span>🔥 10 complaints → +50 pts bonus</span>
-          <span>⭐ 3 resolved → +30 pts bonus</span>
-        </div>
-      </div>
+      </section>
     </div>
   );
 }

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import axios from 'axios';
+import { Activity, Search } from 'lucide-react';
 
 const API_URL = 'http://localhost:5000/api/complaints';
 
@@ -18,7 +19,7 @@ export default function TrackComplaint() {
       const response = await axios.get(`${API_URL}/track`, { params });
       setComplaints(response.data.complaints);
     } catch (err: any) {
-      setError(err.response?.data?.error || 'Failed to track complaint');
+      setError(err.response?.data?.error || 'Tracking matrix failed to locate node');
     } finally {
       setLoading(false);
     }
@@ -26,95 +27,111 @@ export default function TrackComplaint() {
 
   const statusStyle = (status: string): React.CSSProperties => {
     const map: Record<string, React.CSSProperties> = {
-      pending: { background: 'rgba(245,158,11,0.2)', color: '#fcd34d', border: '1px solid rgba(245,158,11,0.3)' },
-      'in-progress': { background: 'rgba(59,130,246,0.2)', color: '#93c5fd', border: '1px solid rgba(59,130,246,0.3)' },
-      resolved: { background: 'rgba(16,185,129,0.2)', color: '#6ee7b7', border: '1px solid rgba(16,185,129,0.3)' },
+      'Pending': { background: '#fef3c7', color: '#92400e', border: '1px solid #fde68a' },
+      'In Progress': { background: '#dbeafe', color: '#1e40af', border: '1px solid #bfdbfe' },
+      'Resolved': { background: '#d1fae5', color: '#065f46', border: '1px solid #a7f3d0' },
     };
-    return map[status] || { background: 'rgba(107,114,128,0.2)', color: '#d1d5db', border: '1px solid rgba(107,114,128,0.3)' };
+    return map[status] || { background: '#f3f4f6', color: '#4b5563', border: '1px solid #e2e8f0' };
   };
 
-  const priorityColor = (p: string) => p === 'High' ? '#f87171' : p === 'Medium' ? '#fbbf24' : '#34d399';
+  const priorityColor = (p: string) => p === 'High' ? '#dc2626' : p === 'Medium' ? '#d97706' : '#059669';
 
   return (
-    <div style={{ maxWidth: '800px', margin: '0 auto', color: 'white', fontFamily: 'Inter,sans-serif' }}>
-      <h1 style={{ fontSize: '2rem', fontWeight: 800, marginBottom: '0.5rem' }}>🔍 Track Complaint</h1>
-      <p style={{ opacity: 0.6, marginBottom: '2rem' }}>Enter your complaint ID or phone number to track status</p>
-
-      <div style={{ background: 'rgba(255,255,255,0.06)', backdropFilter: 'blur(10px)', borderRadius: '20px', padding: '2rem', border: '1px solid rgba(255,255,255,0.1)', marginBottom: '2rem' }}>
-        {/* Toggle */}
-        <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.25rem', background: 'rgba(255,255,255,0.05)', borderRadius: '12px', padding: '0.25rem' }}>
-          {(['id', 'phone'] as const).map(type => (
-            <button key={type} onClick={() => setSearchType(type)} style={{ flex: 1, padding: '0.625rem', borderRadius: '10px', border: 'none', cursor: 'pointer', fontWeight: 600, fontSize: '0.9rem', fontFamily: 'Inter,sans-serif', background: searchType === type ? 'linear-gradient(135deg,#a78bfa,#7c3aed)' : 'transparent', color: searchType === type ? 'white' : 'rgba(255,255,255,0.5)', transition: 'all 0.2s' }}>
-              {type === 'id' ? '🔢 Track by ID' : '📱 Track by Phone'}
-            </button>
-          ))}
+    <div className="cs-main" style={{ paddingBottom: '5rem' }}>
+      <section className="cs-section" style={{ maxWidth: '800px', margin: '0 auto', borderTop: 'none', paddingTop: '3rem' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.5rem' }}>
+          <div style={{ background: 'var(--indigo-light)', padding: '0.5rem', borderRadius: '12px' }}>
+            <Activity size={24} color="var(--indigo)" />
+          </div>
+          <h1 className="cs-h1" style={{ margin: 0, fontSize: '2.2rem' }}>
+            Track Incident
+          </h1>
         </div>
+        <p style={{ color: 'var(--ink2)', marginBottom: '2.5rem', fontSize: '1.05rem', fontFamily: 'var(--sans)' }}>
+          Query the grid using your unique incident ID or mobile link.
+        </p>
 
-        <form onSubmit={handleSearch} style={{ display: 'flex', gap: '0.75rem' }}>
-          <input
-            type={searchType === 'id' ? 'number' : 'tel'}
-            value={searchValue}
-            onChange={e => setSearchValue(e.target.value)}
-            placeholder={searchType === 'id' ? 'Enter Complaint ID (e.g. 5)' : 'Enter Phone Number'}
-            required
-            style={{ flex: 1, padding: '0.875rem 1rem', background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.15)', borderRadius: '12px', color: 'white', fontSize: '1rem', fontFamily: 'Inter,sans-serif', outline: 'none' }}
-          />
-          <button type="submit" disabled={loading} style={{ padding: '0.875rem 1.75rem', background: 'linear-gradient(135deg,#a78bfa,#7c3aed)', color: 'white', border: 'none', borderRadius: '12px', fontWeight: 700, cursor: loading ? 'not-allowed' : 'pointer', opacity: loading ? 0.7 : 1, fontFamily: 'Inter,sans-serif', whiteSpace: 'nowrap' }}>
-            {loading ? 'Searching...' : 'Track →'}
-          </button>
-        </form>
-      </div>
-
-      {error && (
-        <div style={{ background: 'rgba(239,68,68,0.15)', border: '1px solid rgba(239,68,68,0.3)', color: '#fca5a5', padding: '1rem', borderRadius: '12px', marginBottom: '1.5rem' }}>
-          {error}
-        </div>
-      )}
-
-      {complaints.length > 0 && (
-        <div>
-          <p style={{ opacity: 0.6, marginBottom: '1rem', fontSize: '0.9rem' }}>Found {complaints.length} complaint(s)</p>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-            {complaints.map(c => (
-              <div key={c.id} style={{ background: 'rgba(255,255,255,0.06)', backdropFilter: 'blur(10px)', borderRadius: '16px', padding: '1.5rem', border: '1px solid rgba(255,255,255,0.1)' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem' }}>
-                  <div>
-                    <span style={{ fontSize: '0.75rem', opacity: 0.5 }}>Complaint ID</span>
-                    <p style={{ fontSize: '1.5rem', fontWeight: 800, color: '#a78bfa', margin: 0 }}>#{c.id}</p>
-                  </div>
-                  <span style={{ ...statusStyle(c.status), padding: '0.3rem 0.9rem', borderRadius: '20px', fontSize: '0.8rem', fontWeight: 700 }}>
-                    {c.status?.toUpperCase()}
-                  </span>
-                </div>
-
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2,1fr)', gap: '0.75rem', marginBottom: '1rem' }}>
-                  {[
-                    { label: 'Category', value: c.category },
-                    { label: 'Priority', value: c.priority, color: priorityColor(c.priority) },
-                    { label: 'Department', value: c.department },
-                    { label: 'Location', value: c.location },
-                  ].map((item, i) => (
-                    <div key={i}>
-                      <p style={{ fontSize: '0.75rem', opacity: 0.5, margin: '0 0 0.2rem' }}>{item.label}</p>
-                      <p style={{ fontWeight: 600, margin: 0, color: item.color || 'white', fontSize: '0.9rem' }}>{item.value}</p>
-                    </div>
-                  ))}
-                </div>
-
-                <div style={{ background: 'rgba(255,255,255,0.04)', borderRadius: '10px', padding: '0.875rem', marginBottom: '0.75rem' }}>
-                  <p style={{ fontSize: '0.75rem', opacity: 0.5, margin: '0 0 0.25rem' }}>Complaint</p>
-                  <p style={{ margin: 0, lineHeight: 1.6, fontSize: '0.9rem', opacity: 0.85 }}>{c.complaint_text}</p>
-                </div>
-
-                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', opacity: 0.45 }}>
-                  <span>Submitted: {new Date(c.created_at).toLocaleString()}</span>
-                  <span>Updated: {new Date(c.updated_at).toLocaleString()}</span>
-                </div>
-              </div>
+        <div className="cs-card" style={{ padding: '2rem', marginBottom: '2.5rem' }}>
+          {/* Toggle */}
+          <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.5rem', background: 'var(--cream2)', borderRadius: '12px', padding: '0.35rem' }}>
+            {(['id', 'phone'] as const).map(type => (
+              <button key={type} onClick={() => setSearchType(type)} style={{ flex: 1, padding: '0.75rem', borderRadius: '8px', border: '1px solid', cursor: 'pointer', fontWeight: 600, fontSize: '0.95rem', fontFamily: 'var(--sans)', background: searchType === type ? '#ffffff' : 'transparent', color: searchType === type ? 'var(--ink)' : 'var(--ink3)', borderColor: searchType === type ? 'var(--border)' : 'transparent', transition: 'all 0.2s', boxShadow: searchType === type ? '0 1px 3px rgba(0,0,0,0.05)' : 'none' }}>
+                {type === 'id' ? '🔢 Track by ID' : '📱 Track by Phone'}
+              </button>
             ))}
           </div>
+
+          <form onSubmit={handleSearch} style={{ display: 'flex', gap: '0.75rem' }}>
+            <input
+              type={searchType === 'id' ? 'text' : 'tel'}
+              value={searchValue}
+              onChange={e => setSearchValue(e.target.value)}
+              placeholder={searchType === 'id' ? 'Enter Complaint ID' : 'Enter Phone Number'}
+              required
+              className="cs-input"
+              style={{ flex: 1, padding: '1rem 1.25rem', fontSize: '1.05rem' }}
+            />
+            <button type="submit" disabled={loading} style={{ padding: '0 2rem', display: 'flex', alignItems: 'center', gap: '0.5rem', background: 'var(--indigo)', color: 'white', border: 'none', borderRadius: '12px', fontWeight: 600, cursor: loading ? 'not-allowed' : 'pointer', opacity: loading ? 0.7 : 1, fontFamily: 'var(--sans)', letterSpacing: '0.02em', fontSize: '1.05rem', boxShadow: '0 2px 4px rgba(79, 70, 229, 0.2)' }}>
+              {loading ? <Activity className="animate-spin" size={20} /> : <Search size={20} />}
+              {loading ? 'Scanning...' : 'Execute'}
+            </button>
+          </form>
         </div>
-      )}
+
+        {error && (
+          <div style={{ background: 'var(--coral-light)', border: '1px solid rgba(232, 71, 42, 0.2)', color: 'var(--coral)', padding: '1.25rem', borderRadius: '12px', marginBottom: '1.5rem', fontWeight: 600, fontFamily: 'var(--sans)' }}>
+            {error}
+          </div>
+        )}
+
+        {complaints.length > 0 && (
+          <div>
+            <p className="cs-eyebrow" style={{ marginBottom: '1.5rem' }}>Found {complaints.length} incident(s)</p>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+              {complaints.map(c => (
+                <div key={c._id} className="cs-card" style={{ padding: '2rem', position: 'relative', overflow: 'hidden' }}>
+                  <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: '4px', background: priorityColor(c.priority) }} />
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '2rem' }}>
+                    <div>
+                      <span className="cs-eyebrow">Incident Reference ID</span>
+                      <p style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--ink)', margin: '0.25rem 0 0', fontFamily: 'monospace' }}>{c._id}</p>
+                    </div>
+                    <span style={{ ...statusStyle(c.status), padding: '0.5rem 1.25rem', borderRadius: '50px', fontSize: '0.85rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                      {c.status === 'Resolved' ? 'System Clean' : c.status === 'In Progress' ? 'Auto-Dispatch Executing' : 'Pending Triage'}
+                    </span>
+                  </div>
+
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2,1fr)', gap: '1rem', marginBottom: '2rem' }}>
+                    {[
+                      { label: 'Sub-System Category', value: c.category },
+                      { label: 'Threat Level', value: c.priority, color: priorityColor(c.priority) },
+                      { label: 'Assigned Grid', value: c.department },
+                      { label: 'Geo-Location', value: c.location },
+                    ].map((item, i) => (
+                      <div key={i} style={{ background: 'var(--cream)', padding: '1.25rem', borderRadius: '16px', border: '1px solid var(--border)' }}>
+                        <p style={{ fontSize: '0.75rem', color: 'var(--ink3)', margin: '0 0 0.5rem', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 600 }}>{item.label}</p>
+                        <p style={{ fontWeight: 700, margin: 0, color: item.color || 'var(--ink)', fontSize: '1.05rem' }}>{item.value}</p>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div style={{ background: 'var(--cream2)', border: '1px solid var(--border)', borderRadius: '16px', padding: '1.5rem', marginBottom: '1.5rem' }}>
+                    <p style={{ fontSize: '0.85rem', margin: '0 0 0.5rem', textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--indigo)', display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 700 }}>
+                      <Activity size={16} /> Source Context
+                    </p>
+                    <p style={{ margin: 0, lineHeight: 1.6, fontSize: '1rem', color: 'var(--ink2)', fontWeight: 500 }}>{c.complaint_text}</p>
+                  </div>
+
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', color: 'var(--ink3)', fontFamily: 'monospace', fontWeight: 600 }}>
+                    <span>LOGGED: {new Date(c.createdAt).toLocaleString()}</span>
+                    <span>SYNCED: {new Date(c.updatedAt).toLocaleString()}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </section>
     </div>
   );
 }
